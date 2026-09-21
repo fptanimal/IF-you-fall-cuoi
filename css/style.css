@@ -1,0 +1,4 @@
+@import url("/frontend/css/style.css");
+
+/* Fallback: if import fails, set a minimal dark background so page is readable */
+html, body { background: #0b0e14; color: #d0d8e8; }

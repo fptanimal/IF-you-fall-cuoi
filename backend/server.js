@@ -13,71 +13,53 @@ app.use(express.json());
 // Phục vụ giao diện Frontend (từ thư mục ../frontend)
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// ── HELPER: Gọi Gemini API với auto-retry ──
-async function callGemini(messages, retries = 2) {
-    const apiKey = process.env.AI_API_KEY;
-    const model = process.env.AI_MODEL || 'gemini-2.0-flash';
+// ── HELPER: Gọi API tương thích chuẩn OpenAI (OpenRouter/Groq/etc) ──
+async function callOpenAICompatibleAPI(messages, retries = 2) {
+    const apiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
+    // Mặc định dùng OpenRouter với model miễn phí Llama 3
+    const apiUrl = process.env.OPENAI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
+    const modelName = process.env.AI_MODEL || 'meta-llama/llama-3-8b-instruct:free';
 
     if (!apiKey) throw new Error('NO_API_KEY');
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                // Header tùy chọn cho OpenRouter
+                'HTTP-Referer': 'http://localhost:8899', 
+                'X-Title': 'If You Fall Game'
+            },
+            body: JSON.stringify({
+                model: modelName,
+                messages: messages
+            })
+        });
 
-    // Convert OpenAI-style messages to Gemini format
-    let systemInstruction = '';
-    const geminiContents = [];
+        const data = await response.json();
 
-    messages.forEach(msg => {
-        if (msg.role === 'system') {
-            systemInstruction = msg.content;
-        } else {
-            geminiContents.push({
-                role: msg.role === 'assistant' ? 'model' : 'user',
-                parts: [{ text: msg.content }]
-            });
+        if (!response.ok) {
+            throw new Error(data.error?.message || `Lỗi API: ${response.status}`);
         }
-    });
 
-    const geminiBody = {
-        contents: geminiContents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
-    };
-
-    if (systemInstruction) {
-        geminiBody.systemInstruction = { parts: [{ text: systemInstruction }] };
+        return data.choices[0].message.content;
+    } catch (error) {
+        if ((error.message.includes('429') || error.message.includes('503')) && retries > 0) {
+            console.log(`⏳ Rate limited or unavailable. Retrying in 5s... (${retries} retries left)`);
+            await new Promise(r => setTimeout(r, 5000));
+            return callOpenAICompatibleAPI(messages, retries - 1);
+        }
+        throw error;
     }
-
-    const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(geminiBody)
-    });
-
-    // Auto-retry on rate limit (429)
-    if (response.status === 429 && retries > 0) {
-        console.log(`⏳ Rate limited. Retrying in 5s... (${retries} retries left)`);
-        await new Promise(r => setTimeout(r, 5000));
-        return callGemini(messages, retries - 1);
-    }
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API Error:', response.status);
-        throw new Error(`GEMINI_ERROR_${response.status}`);
-    }
-
-    const data = await response.json();
-    let aiText = '';
-    if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
-        aiText = data.candidates[0].content.parts.map(p => p.text).join('');
-    }
-    return aiText;
 }
 
 // ── API: GỌI AI CHATBOT ──
 app.post('/api/chat', async (req, res) => {
     try {
         const { messages } = req.body;
-        const aiText = await callGemini(messages);
+        const aiText = await callOpenAICompatibleAPI(messages);
 
         // Trả về định dạng OpenAI-compatible cho frontend
         res.json({
@@ -108,10 +90,10 @@ app.use((req, res) => {
 
 // Khởi động Server
 app.listen(PORT, () => {
-    const hasKey = !!process.env.AI_API_KEY;
+    const hasKey = !!(process.env.OPENAI_API_KEY || process.env.AI_API_KEY);
     console.log('\n  ╔══════════════════════════════════════════╗');
-    console.log('  ║  IF YOU FALL — FULLSTACK ARCHITECTURE    ║');
-    console.log(`  ║  Server is running: http://localhost:${PORT} ║`);
-    console.log(`  ║  AI Engine: Google Gemini ${hasKey ? '✅ KEY OK' : '❌ NO KEY'}        ║`);
+    console.log('  ║  IF YOU FALL — Backend Server             ║');
+    console.log(`  ║  http://localhost:${PORT}                    ║`);
+    console.log(`  ║  AI API: ${hasKey ? '✅ KEY OK' : '❌ NO KEY'}                            ║`);
     console.log('  ╚══════════════════════════════════════════╝\n');
 });

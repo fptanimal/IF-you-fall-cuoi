@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>If You Fall</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/theme.css">
 </head>
 
 <body>
@@ -772,9 +773,9 @@
         <button class="news-back-btn" style="top: 75px; z-index: 99999;" onclick="backToMenu()">QUAY LẠI MENU</button>
         <div class="ai-left">
             <div class="ai-header">
-                <div class="ai-tag">HEALTH MONITOR AI · v2.4</div>
-                <h2>DỰ ĐOÁN TUỔI THỌ</h2>
-                <p>Nhập thông tin lối sống để AI phân tích và dự đoán tuổi thọ ước tính.</p>
+                <div class="ai-tag">CÔNG CỤ ƯỚC TÍNH SỨC KHỎE · Dựa trên số liệu WHO/AHA/CDC</div>
+                <h2>ƯỚC TÍNH TUỔI THỌ</h2>
+                <p>Nhập thông tin lối sống để công cụ phân tích và ước tính tuổi thọ dựa trên hệ số nguy cơ từ y văn quốc tế.</p>
             </div>
             <div class="ai-form-area">
                 <div class="ai-section">
@@ -1113,16 +1114,23 @@
         <div class="ai-chat-messages" id="aiChatMessages">
             <div class="chat-msg bot">
                 <b>BÁC SĨ AI</b><br>
-                <div style="background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.25);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#ff8888;line-height:1.5;">
-                    ⚠️ <b>CẢNH BÁO QUAN TRỌNG:</b> Tôi là AI mô phỏng, <b>KHÔNG PHẢI bác sĩ thật</b>. Mọi thông tin tôi cung cấp chỉ mang tính <b>THAM KHẢO</b>, có thể sai hoặc không phù hợp với tình trạng cụ thể của bạn. <b>TUYỆT ĐỐI KHÔNG</b> tự chẩn đoán hoặc tự điều trị dựa trên câu trả lời của AI.
+                <div class="msg-content">
+                    <div class="chat-disclaimer-box">
+                        <div class="disclaimer-title">⚠️ <b>CẢNH BÁO QUAN TRỌNG</b></div>
+                        Tôi là AI mô phỏng, <b>KHÔNG PHẢI bác sĩ thật</b>. Mọi thông tin tôi cung cấp chỉ mang tính tham khảo. Tuyệt đối không tự chẩn đoán hoặc tự điều trị dựa trên câu trả lời của AI.
+                    </div>
+                    <div class="chat-welcome-text">
+                        Chào bạn! Tôi có thể chia sẻ một số kiến thức y tế cơ bản để bạn tham khảo. Tuy nhiên, xin hãy luôn nhớ:
+                    </div>
+                    <ul class="chat-tips-list">
+                        <li><span class="icon">🏥</span> <span>Khi có triệu chứng bất thường → <b>đến bệnh viện ngay</b></span></li>
+                        <li><span class="icon">📞</span> <span>Trường hợp khẩn cấp → gọi <b>115</b></span></li>
+                        <li><span class="icon">🚫</span> <span>Không dùng AI thay thế bác sĩ chuyên khoa</span></li>
+                    </ul>
+                    <div class="chat-welcome-question">
+                        Bạn muốn hỏi gì? Tôi sẽ cố gắng chia sẻ trong phạm vi kiến thức tham khảo.
+                    </div>
                 </div>
-                Chào bạn! Tôi có thể chia sẻ một số kiến thức y tế cơ bản để bạn <b>tham khảo</b>. Tuy nhiên, xin hãy luôn nhớ:
-                <ul style="margin:8px 0;padding-left:18px;font-size:13px;color:#ccc;line-height:1.6;">
-                    <li>🏥 Khi có triệu chứng bất thường → <b>đến bệnh viện ngay</b></li>
-                    <li>📞 Trường hợp khẩn cấp → gọi <b style="color:#ff4444">115</b></li>
-                    <li>🚫 Không dùng AI thay thế bác sĩ chuyên khoa</li>
-                </ul>
-                Bạn muốn hỏi gì? Tôi sẽ cố gắng chia sẻ trong phạm vi kiến thức tham khảo.
             </div>
         </div>
         <div class="ai-chat-input-area">
@@ -1137,6 +1145,8 @@
     <script src="js/data.js"></script>
     <script src="js/story_data.js"></script>
     <script src="js/medical_data.js"></script>
+    <script src="js/health_calc.js"></script>
+    <script src="js/chat_client.js"></script>
     <script src="js/storyIntro.js"></script>
     <script src="js/game.js"></script>
 

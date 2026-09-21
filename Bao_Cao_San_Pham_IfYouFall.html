@@ -1,0 +1,182 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>Báo Cáo Phân Tích If You Fall</title>
+<style>
+body { font-family: "Times New Roman", serif; font-size: 14pt; line-height: 1.5; padding: 20px; }
+h1 { color: #2c3e50; font-size: 24pt; text-align: center; }
+h2 { color: #2980b9; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; margin-top: 30px; font-size: 18pt; }
+h3 { color: #34495e; font-size: 14pt; margin-top: 20px; }
+ul { margin-bottom: 15px; }
+li { margin-bottom: 8px; }
+strong { font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>BẢN PHÂN TÍCH VÀ TÓM TẮT SẢN PHẨM CHUYÊN SÂU: "IF YOU FALL" (tooicos)</h1>
+
+<p><strong>Mức độ:</strong> Chi tiết / Chuyên gia (Technical & Product Analysis)<br>
+<strong>Ngày phân tích:</strong> Cập nhật mới nhất dựa trên mã nguồn phiên bản v7.0<br>
+<strong>Mục đích:</strong> Cung cấp bức tranh toàn cảnh sâu sắc nhất về ý tưởng, kiến trúc, tính năng và tiềm năng phát triển của dự án để trình bày trước đối tác, nhà đầu tư hoặc phục vụ việc bàn giao (Hand-over) cho đội ngũ kỹ thuật mới.</p>
+
+<hr>
+
+<h2>1. TỔNG QUAN SẢN PHẨM (EXECUTIVE SUMMARY)</h2>
+
+<h3>1.1. Tên sản phẩm & Định vị</h3>
+<ul>
+<li><strong>Tên dự án:</strong> If You Fall (hay còn được biết đến qua repo ifyoufallcuoi / ifyoufallhuhu).</li>
+<li><strong>Định vị sản phẩm:</strong> Một Web Game thuộc thể loại <strong>Giả lập sinh tồn tương tác (Interactive Survival Simulation)</strong> kết hợp <strong>Hệ thống chuyên gia AI Y tế</strong>. Không đơn thuần là một trò chơi giải trí, đây là một sản phẩm giáo dục Y khoa (Serious Game) được thiết kế đặc biệt để tác động mạnh mẽ vào nhận thức của người dùng.</li>
+</ul>
+
+<h3>1.2. Ý tưởng & Trải nghiệm cốt lõi (Core Concept)</h3>
+<ul>
+<li>Game khắc họa một thực trạng nhức nhối của xã hội hiện đại: <strong>"Sự đánh đổi sinh mệnh lấy đồng tiền"</strong>.</li>
+<li>Người chơi sẽ phải đối mặt với các bài toán quản lý tài nguyên khắt khe nhất: Thời gian (24h/ngày), Năng lượng cơ thể, Sự mệt mỏi, và Áp lực tài chính cực lớn (các khoản nợ, viện phí cho người thân). </li>
+<li>Sự kịch tính nằm ở chỗ: Để đạt được mục tiêu tiền bạc, người chơi bắt buộc phải đưa ra những quyết định sinh hoạt độc hại (Cày đêm, Làm Overtime liên tục, Bỏ bữa, Hút thuốc, Dùng chất kích thích). Hậu quả không xuất hiện ngay, mà tích tụ ngầm cho đến khi phát sinh <strong>Đột quỵ (Stroke)</strong> hoặc <strong>Nhồi máu cơ tim (Heart Attack)</strong>.</li>
+</ul>
+
+<h3>1.3. Đối tượng mục tiêu (Target Audience)</h3>
+<ul>
+<li>Dân văn phòng, Kỹ sư IT, Sinh viên, Freelancers — những người thường xuyên thức khuya, chạy deadline, chịu áp lực cao (Stress).</li>
+<li>Mở rộng: Sử dụng làm tài liệu truyền thông tương tác cho các chiến dịch y tế cộng đồng, bệnh viện, hoặc tổ chức phòng chống đột quỵ.</li>
+</ul>
+
+<h3>1.4. Trạng thái dự án</h3>
+<ul>
+<li>Đã vượt qua giai đoạn MVP (Minimum Viable Product).</li>
+<li>Đang ở phiên bản <strong>Production (v7.0)</strong>. Các module lõi từ UI/UX, Game Logic, đến tích hợp AI (Google Gemini) đều đã hoạt động trơn tru. Sẵn sàng deploy lên các nền tảng serverless như Vercel.</li>
+</ul>
+
+<hr>
+
+<h2>2. PHÂN TÍCH CHI TIẾT DANH SÁCH TÍNH NĂNG (FEATURE BREAKDOWN)</h2>
+
+<h3>2.1. Module Gameplay & Cơ chế giả lập (Simulation Mechanics)</h3>
+<p>Đây là "trái tim" của phần trò chơi, được implement chủ yếu bằng Canvas API và Vanilla JS (<code>game.js</code>, <code>data.js</code>).</p>
+<ul>
+<li><strong>Hệ thống 4 Tuyến nhân vật (Destiny Paths):</strong> Trò chơi không rập khuôn mà chia thành 4 kịch bản hoàn cảnh sống khác nhau, tạo giá trị chơi lại (Replayability) cao:
+  <ul>
+  <li><strong>Minh:</strong> Trụ cột gia đình truyền thống. Gánh nặng viện phí và trách nhiệm.</li>
+  <li><strong>Lan:</strong> Nữ giới. Áp lực công việc cường độ cao. Có thể có các rủi ro sức khỏe đặc thù.</li>
+  <li><strong>Hùng:</strong> Thanh niên trẻ. Nợ nần bủa vây, lối sống buông thả.</li>
+  <li><strong>Khánh:</strong> Có chỉ số đặc thù <strong>Cân nặng (Weight)</strong>. Đây là tính năng nâng cao, yêu cầu người chơi phải cân bằng chế độ ăn uống, tập luyện (Gym) để không bị béo phì (yếu tố nguy cơ đột quỵ).</li>
+  </ul>
+</li>
+<li><strong>Hệ thống HUD (Heads-Up Display) Đa chiều:</strong>
+  <ul>
+  <li><strong>Năng lượng (Energy) & Mệt mỏi (Fatigue):</strong> Hai chỉ số đối nghịch. Năng lượng cạn sẽ không thể làm việc, Mệt mỏi đạt 100% sẽ dẫn đến "Game Over" do Đột quỵ/Sốc nhiệt. Cảnh báo rung lắc màn hình và dòng chữ đỏ xuất hiện khi chạm ngưỡng.</li>
+  <li><strong>Sức khỏe (HP):</strong> Điểm sinh mệnh tổng thể.</li>
+  <li><strong>Độ no (Hunger) & Tri thức (Knowledge):</strong> Yêu cầu ăn uống đúng giờ và học tập để mở khóa việc lương cao.</li>
+  </ul>
+</li>
+<li><strong>Hành động & Môi trường (World Interaction):</strong>
+  <ul>
+  <li><strong>Khu vực (Map Phố Cổ):</strong> Phân chia thành Văn phòng (Tăng ca, Dự án), Khu làm đêm, Khu nghỉ ngơi (Ngủ, Mạng xã hội), Café & Y tế (Uống cà phê ép tỉnh táo, Khám bệnh phục hồi HP).</li>
+  <li><strong>Hệ thống Thời gian thực (In-game Clock):</strong> Mỗi hành động tiêu tốn X giờ. Người chơi bị giới hạn trong 30-45 ngày tùy độ khó.</li>
+  </ul>
+</li>
+</ul>
+
+<h3>2.2. Module Trí tuệ Nhân tạo - Bác sĩ AI (AI Engine)</h3>
+<p>Điểm nhấn công nghệ của dự án, biến game thành một nền tảng tư vấn sức khỏe.</p>
+<ul>
+<li><strong>Lõi xử lý:</strong> Tích hợp <strong>Google Gemini 2.0 Flash API</strong>. AI được "tiêm" (prompt injection) các kiến thức y khoa chuyên sâu để nhập vai một Bác sĩ Cấp cứu.</li>
+<li><strong>Tầm soát rủi ro dựa trên dữ liệu thật:</strong> AI có khả năng lắng nghe thói quen của người dùng, đối chiếu với bộ dữ liệu y khoa tĩnh (từ WHO, CDC, AHA) để đưa ra % tỷ lệ đột quỵ và cảnh báo sớm.</li>
+<li><strong>Kiến trúc "Fallback 3 Lớp" (Highly Resilient Architecture):</strong>
+  <ol>
+  <li><strong>Lớp 1 (Vercel Serverless):</strong> Frontend gửi request tới <code>/api/chat</code>. Lớp này giúp che giấu API Key, an toàn khi deploy public.</li>
+  <li><strong>Lớp 2 (Local Express Server):</strong> Nếu Vercel lỗi, game tự trỏ về <code>localhost:8899</code>.</li>
+  <li><strong>Lớp 3 (Offline Mode):</strong> Nếu API bị chặn, hoặc đạt giới hạn "Rate Limit 429", game tự động tắt AI online và chuyển sang chế độ phản hồi cục bộ. Trải nghiệm người dùng <strong>không bao giờ bị gián đoạn</strong>.</li>
+  </ol>
+</li>
+</ul>
+
+<h3>2.3. Module UI/UX & Kho tàng Y học (Edtech Features)</h3>
+<ul>
+<li><strong>Thiết kế Giao diện Đa tầng:</strong> Lớp nền là Canvas đồ họa Pixel Art. Lớp phủ (Overlay) mang phong cách Glassmorphism. Hiệu ứng Scanlines (đường quét của màn hình CRT cũ) làm tăng không khí căng thẳng, u ám.</li>
+<li><strong>Emergency Modal (Tài liệu Cấp cứu Khẩn cấp):</strong>
+  Tích hợp 1 nút "Kiến thức Khẩn cấp" chứa danh bạ hệ thống Y tế Việt Nam (115, 113, Trung tâm Chống độc). Bấm vào gọi ngay. Hướng dẫn sơ cứu bằng hình ảnh/text nhanh: Dấu hiệu F.A.S.T, CPR (Ép tim), Heimlich.
+</li>
+<li><strong>Hệ thống Đa ngôn ngữ (I18N):</strong> Kiến trúc đã thiết kế sẵn hàm đa ngôn ngữ để dễ dàng dịch game ra tiếng Anh.</li>
+</ul>
+
+<h3>2.4. Module Quản trị, Lưu trữ & Bảo mật (Admin & Security)</h3>
+<ul>
+<li><strong>Lưu trữ Cục bộ (Local Save):</strong> Toàn bộ trạng thái game và Setting (Âm thanh, Độ khó) được tuần tự hóa và lưu vào <code>localStorage</code> của trình duyệt.</li>
+<li><strong>Mã hóa Dữ liệu Y tế (Military-grade Encryption):</strong> Bằng việc sử dụng module <code>crypto</code> của Node.js, dữ liệu giả lập bệnh nhân được mã hóa chuẩn <strong>AES-256-GCM</strong>.</li>
+<li><strong>Quy trình Train AI an toàn:</strong> Script sẽ giải mã file <code>.enc</code> trực tiếp trên RAM (In-memory decryption), xuất ra file <code>ai_model_data.js</code> an toàn, và lập tức "Wipe Memory" (xóa bộ nhớ). Điều này ngăn chặn rò rỉ thông tin cá nhân.</li>
+</ul>
+
+<hr>
+
+<h2>3. PHÂN TÍCH KIẾN TRÚC & TECH STACK</h2>
+<p>Dự án áp dụng mô hình <strong>Client-Server kết hợp Serverless</strong>, nhưng phần lớn logic phức tạp lại nằm hoàn toàn ở Client.</p>
+<ul>
+<li><strong>Frontend Core:</strong> HTML5 Canvas, Vanilla JavaScript (ES5/ES6). Giúp game render mượt, nhưng logic tập trung quá nhiều vào <code>game.js</code>.</li>
+<li><strong>Styling:</strong> CSS3 Vanilla, FontAwesome (Không dùng thư viện bên thứ ba giúp game nhẹ).</li>
+<li><strong>Backend & API:</strong> Node.js, Express.js. Dùng làm proxy giao tiếp với AI.</li>
+<li><strong>Serverless:</strong> Vercel (Cấu hình rewrite trong <code>vercel.json</code>).</li>
+<li><strong>Trí tuệ nhân tạo:</strong> <code>@google/generative-ai</code> (Gemini 2.0 Flash).</li>
+<li><strong>Bảo mật (Crypto):</strong> Node.js Crypto (AES-256-GCM).</li>
+</ul>
+
+<hr>
+
+<h2>4. SƠ ĐỒ CẤU TRÚC THƯ MỤC CHUYÊN SÂU</h2>
+<pre style="background: #f4f4f4; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 11pt;">
+ifyoufallcuoi/
+├── package.json                  # Định nghĩa dependencies.
+├── vercel.json                   # Cấu hình routing cho Serverless (Map /api -&gt; /api/chat.js).
+├── README.md, CHATBOT_SETUP.md   # Tài liệu hướng dẫn thiết lập hệ thống Bác sĩ AI.
+├── api/
+│   └── chat.js                   # [VERCEL SERVERLESS] Xử lý CORS, khởi tạo model Gemini.
+├── backend/
+│   ├── server.js                 # [LOCAL SERVER] Express backend. Tự động auto-retry khi Rate Limit.
+│   ├── encrypt_db.js             # [SECURITY] Mã hóa file JSON thành dạng AES-256-GCM (.enc).
+│   ├── train_ai.js               # [AI DATA PREP] Giải mã In-memory, chuẩn hóa trọng số bệnh lý, Wipe RAM.
+│   ├── data/ &amp; dulieubenhnhan/   # Database tĩnh (clinical_db.json, pii_db.json, records.enc).
+│   └── .env                      # Nơi chứa GEMINI_API_KEY và MASTER_KEY.
+└── frontend/                     # [CLIENT APPLICATION]
+    ├── index.html                # Main UI (Cấu trúc DOM khổng lồ).
+    ├── css/style.css             # Định nghĩa UI, animation.
+    ├── assets/                   # Chứa Background và Assets.
+    └── js/                       
+        ├── game.js               # Lõi Game (Main Loop). Quản lý Event, Canvas Render (File khổng lồ 300KB+).
+        ├── data.js               # Chứa Object config, độ khó, biến mục tiêu, ngôn ngữ.
+        ├── medical_data.js       # Bách khoa toàn thư Y tế: Nguồn, Thống kê, Bảng điểm rủi ro.
+        ├── storyIntro.js         # Hệ thống Visual Novel lúc cắt cảnh đầu game.
+        └── ai_model_data.js      # Trọng số AI tĩnh.
+</pre>
+
+<hr>
+
+<h2>5. ĐÁNH GIÁ KỸ THUẬT: ĐIỂM MẠNH & NỢ KỸ THUẬT (TECHNICAL DEBT)</h2>
+
+<h3>🌟 Điểm sáng đột phá (Strengths)</h3>
+<ol>
+<li><strong>Thiết kế System Resilience cực tốt:</strong> Cơ chế Fallback AI 3 lớp giúp game không bao giờ crash nếu đứt mạng, xử lý lỗi (Error Handling) cực kỳ thanh lịch.</li>
+<li><strong>Xử lý Dữ liệu Nhạy cảm (Security by Design):</strong> Tư duy mã hóa AES-256 để bảo vệ dữ liệu PII là điểm cộng lớn, thường chỉ thấy ở cấp độ Senior.</li>
+<li><strong>Hiệu năng Render xuất sắc:</strong> Dùng Canvas thuần giúp FPS ổn định trên cả mobile yếu.</li>
+</ol>
+
+<h3>⚠️ Nợ kỹ thuật (Technical Debt & Weaknesses)</h3>
+<ol>
+<li><strong>Kiến trúc God Object / Monolithic File:</strong> File <code>game.js</code> hơn 4500 dòng code. Nó ôm đồm mọi thứ từ Game Loop, Audio, UI update. Khi mở rộng sẽ dẫn đến "Cơn ác mộng bảo trì".</li>
+<li><strong>Khủng hoảng Global Scope:</strong> Định nghĩa quá nhiều biến cấp độ <code>window</code> (var CFG, var G). Dễ gây bug ghi đè biến.</li>
+<li><strong>Mất Dữ Liệu Cục Bộ (No Cloud DB):</strong> Lưu trữ 100% bằng <code>localStorage</code>. Người chơi xóa bộ nhớ cache là mất toàn bộ dữ liệu (rất nguy hiểm cho game cày cuốc 30-45 ngày ảo).</li>
+<li><strong>Quản lý Asset Nguyên thủy:</strong> Không dùng Bundler (Webpack/Vite), kéo theo file JS tải rời rạc, không nén, dễ bị đánh cắp nguồn.</li>
+</ol>
+
+<hr>
+
+<h2>6. LỘ TRÌNH PHÁT TRIỂN & KHẮC PHỤC (ROADMAP & NEXT STEPS)</h2>
+<ul>
+<li><strong>Phase 1: Tái cấu trúc (Refactoring):</strong> Xé nhỏ <code>game.js</code> thành các Module ES6 riêng rẽ (Core, Entity, Renderer, Input). Chuyển sang build bằng <strong>Vite</strong> để nén ảnh, nén JS.</li>
+<li><strong>Phase 2: Database Đám mây (Cloud):</strong> Tích hợp <strong>Supabase</strong> hoặc <strong>Firebase</strong>. Cho phép Đăng nhập (Auth), Lưu tiến trình tự động (Cloud Save) và làm Bảng xếp hạng toàn cầu (Leaderboard).</li>
+<li><strong>Phase 3: Nâng cấp Game Engine:</strong> Chuyển lõi vẽ Canvas thủ công hiện tại sang Engine chuyên dụng như <strong>Phaser.js</strong> để tăng tốc độ phát triển các tính năng như Camera cuộn, Sprite Hoạt hình phức tạp. Hoàn thiện "Phòng Gym" cho nhân vật Khánh.</li>
+</ul>
+
+</body>
+</html>

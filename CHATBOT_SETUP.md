@@ -1,162 +1,48 @@
-# 🤖 Hướng Dẫn Setup Chatbot AI
+# Hướng Dẫn Cấu Hình Bác Sĩ AI (Chatbot)
 
-## Vấn đề đã sửa
-❌ **Trước đó**: API endpoint gọi tới `https://ollama.com/api/chat` - không hợp lệ  
-✅ **Hiện tại**: Chatbot hoạt động với fallback thông minh:
-- Thử gọi Vercel API endpoint (`/api/chat`)
-- Nếu fail, thử localhost backend (`:8899`)
-- Nếu fail, dùng chế độ **Offline Mode** (AI có sẵn, không cần API)
+Tính năng Chatbot Bác Sĩ AI sử dụng chuẩn kết nối OpenAI (có thể dùng với OpenRouter, Groq, ChatGPT, v.v.). Để Chatbot hoạt động ở chế độ Online, bạn bắt buộc phải tuân thủ hướng dẫn về Môi trường (Environment) dưới đây.
 
----
+## 1. Lưu ý TỐI QUAN TRỌNG về Môi trường chạy (Tránh lỗi 404)
 
-## 🚀 Cách Chạy Chatbot
+Hệ thống API gọi tới AI được lập trình dưới dạng **Vercel Serverless Function** (tại file `api/chat.js`) và cũng có thể chạy local với Express (tại `backend/server.js`).
 
-### **Cách 1: Offline Mode (Không cần API)**
-✅ **Đơn giản nhất - không cần cấu hình**
+❌ **Nhưng cách chạy GÂY LỖI 404 (Luôn Offline):**
+- Mở thẳng file `index.html` bằng trình duyệt (giao thức `file:///`).
+- Dùng các phần mềm Static Server như Live Server của VSCode, `python -m http.server`, `http-server`...
+> Ở các môi trường này, đường dẫn `/api/chat` KHÔNG TỒN TẠI. Bot sẽ không tìm thấy server ảo và tự động chuyển về 🔴 Offline Mode.
 
-Chatbot sẽ tự động dùng Offline Mode khi:
-- Không có kết nối API
-- Hoặc backend server không chạy
-
-**Tính năng Offline**:
-- AI phản hồi dựa trên MEDICAL_DATA database
-- Câu trả lời thông minh về sức khỏe, đột quỵ, tim mạch
-- Fallback logic thông minh
+✅ **CÁCH CHẠY CHUẨN ĐỂ ONLINE:**
+1. **Chạy Node.js Local:** Mở terminal, chạy lệnh `node backend/server.js`. Sau đó truy cập `http://localhost:8899`.
+2. **Chạy bằng Vercel CLI (vercel dev):** Nếu bạn có cài đặt Vercel CLI, dùng lệnh `vercel dev` và truy cập cổng 3000.
+3. **Chạy Production (Đã đưa lên mạng):** Truy cập trực tiếp tên miền Vercel (ví dụ `https://ifyoufall.vercel.app`).
 
 ---
 
-### **Cách 2: Chạy Backend Server (Có API)**
-💪 **Mạnh mẽ hơn - dùng Gemini API**
+## 2. Thiết Lập API Key
+Dự án sử dụng chuẩn biến môi trường `OPENAI_API_KEY`. Bạn có thể lấy API Key miễn phí từ các nền tảng như [OpenRouter](https://openrouter.ai/) hoặc [Groq](https://console.groq.com/).
 
-**Yêu cầu**:
-1. Node.js đã cài (v14+)
-2. Gemini API Key từ Google
+### Chạy Local
+- Copy file `.env.example` thành `.env` ở thư mục gốc (nếu có) hoặc tạo file `.env` mới.
+- Điền API Key của bạn vào: `OPENAI_API_KEY=sk-or-v1-...`
+- (Tuỳ chọn) Nếu dùng Groq, bạn có thể thiết lập `OPENAI_API_URL=https://api.groq.com/openai/v1/chat/completions` và `AI_MODEL=llama3-8b-8192`. Mặc định đang thiết lập cho OpenRouter.
 
-**Bước 1**: Tạo file `.env` trong thư mục `backend/`:
-```
-AI_API_KEY=your_gemini_api_key_here
-AI_MODEL=gemini-2.0-flash
-PORT=8899
-```
+### Chạy Production (Đã deploy Vercel)
+Vì file `.env` chứa mật khẩu nên sẽ BỊ CHẶN không cho đẩy lên GitHub/Vercel (do đã cài đặt trong `.gitignore`).
+Do đó, khi đưa lên mạng, API Key của bạn sẽ bị mất, gây lỗi 🔴 Offline.
 
-**Bước 2**: Cài dependencies:
-```bash
-cd backend
-npm install
-```
-
-**Bước 3**: Chạy server:
-```bash
-npm start
-```
-
-Server sẽ chạy tại `http://localhost:8899`
-
-**Bước 4**: Mở frontend:
-- `http://localhost:8899` - Frontend sẽ tự load
-- Hoặc mở `index.html` trực tiếp
-
-Frontend sẽ tự động detect backend server và dùng nó!
+**Cách khắc phục:**
+1. Truy cập [Vercel Dashboard](https://vercel.com/dashboard).
+2. Chọn dự án "If You Fall" ➔ Settings ➔ Environment Variables.
+3. Thêm biến mới với tên `OPENAI_API_KEY` và dán key của bạn vào.
+4. (Tuỳ chọn) Thêm biến `OPENAI_API_URL` và `AI_MODEL` nếu dùng nhà cung cấp khác OpenRouter.
+5. Bấm **Deployments** ➔ Redeploy bản mới nhất để Vercel nhận diện key mới.
 
 ---
 
-### **Cách 3: Deploy lên Vercel**
-🌐 **Deploy toàn bộ ứng dụng**
+## 3. Khắc phục sự cố thường gặp (Troubleshooting)
 
-**Bước 1**: Setup Vercel:
-```bash
-npm install -g vercel
-vercel
-```
-
-**Bước 2**: Thêm Environment Variables trong Vercel Dashboard:
-- `GEMINI_API_KEY=your_key_here`
-
-**Bước 3**: Deploy:
-```bash
-vercel --prod
-```
-
-API endpoint sẽ là: `https://your-domain.vercel.app/api/chat`
-
----
-
-## 🔑 Lấy Gemini API Key
-
-1. Vào https://makersuite.google.com/app/apikey
-2. Click "Create API Key"
-3. Copy API Key
-4. Thêm vào `.env` hoặc Vercel environment variables
-
-**LƯU Ý**: 
-- Gemini miễn phí cho ~60 request/phút
-- Nếu vượt giới hạn, sẽ tự fallback sang Offline Mode
-
----
-
-## 🧪 Test Chatbot
-
-Mở DevTools (F12) trong browser và test:
-
-```javascript
-// Test hỏi về sức khỏe
-```
-
-Chatbot sẽ trả lời theo cấu hình system prompt.
-
----
-
-## 🐛 Xử Lý Sự Cố
-
-### **Chatbot không phản hồi?**
-1. ✅ Mở DevTools (F12)
-2. ✅ Vào tab Console
-3. ✅ Xem lỗi gì xuất hiện
-4. ✅ Kiểm tra có API Key không
-
-### **Lỗi "Invalid API Key"**
-→ Kiểm tra lại Gemini API Key trong `.env`
-
-### **Localhost backend không kết nối?**
-→ Chắc chắn backend server đang chạy ở port 8899:
-```bash
-# Kiểm tra port 8899 đang chạy không
-netstat -ano | findstr :8899
-```
-
-### **Offline Mode xuất hiện**
-→ Đó là tình trạng bình thường! Có thể:
-- Backend không chạy
-- API Key hết hạn
-- Network error
-
-Offline Mode vẫn hoạt động tốt!
-
----
-
-## 📊 Status Indicator
-
-Chatbot sẽ hiển thị:
-- 🟢 **Xanh**: Đang dùng API online
-- 🔴 **Đỏ**: Offline Mode (nhưng vẫn hoạt động)
-
----
-
-## 💡 Lưu Ý
-
-⚠️ **QUAN TRỌNG**: Chatbot AI là **mô phỏng giáo dục**, KHÔNG thay thế bác sĩ thật!
-
-Mọi câu trả lời sẽ có disclaimer:
-```
-⚠️ Lưu ý: Đây là thông tin tham khảo từ AI, không phải chẩn đoán y khoa.
-🏥 Nếu bạn có triệu chứng bất thường, hãy đến bệnh viện hoặc gọi 115 ngay.
-```
-
----
-
-## 📞 Cần Giúp?
-
-Kiểm tra logs:
-- Browser Console (F12)
-- Backend console (terminal chạy server)
-- Vercel logs (nếu deploy lên Vercel)
+Nếu gặp cảnh báo Offline, hãy mở F12 (Console) trên trình duyệt để đọc log:
+- **Lý do 404 - Sai môi trường:** Bạn đang không chạy server cục bộ hoặc không truy cập qua domain thật.
+- **Lý do Sai API Key (401/403):** API Key đã hết hạn, chưa kích hoạt, hoặc copy thiếu ký tự.
+- **Lý do 429 - Quá tải/Giới hạn:** Provider của bạn đã chặn do gửi quá nhiều yêu cầu trong thời gian ngắn. Vui lòng đợi một lát rồi thử lại.
+- **Mất kết nối API:** Rớt mạng hoặc Backend Vercel đang bị lỗi tạm thời. Hệ thống vẫn sẽ trả lời bạn bằng dữ liệu sơ cứu nội bộ.

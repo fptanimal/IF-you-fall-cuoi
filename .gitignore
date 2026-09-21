@@ -1,3 +1,15 @@
 .vercel
+.env
 .env*.local
 node_modules
+
+# Backend sensitive data
+backend/.env
+backend/data/
+backend/dulieubenhnhan/
+*.enc
+
+# Test/build artifacts
+out.txt
+test_ai_out.txt
+test_screenshot.png

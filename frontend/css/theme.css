@@ -1,0 +1,156 @@
+/* ══════════════════════════════════════════════════════════════
+   DARK MOODY THEME OVERRIDES
+   Áp dụng design tokens vào UI AI Health
+   ══════════════════════════════════════════════════════════════ */
+
+/* Backgrounds & Panels */
+.ai-left, .ai-right {
+    background: var(--clr-bg-surface);
+    border: 1px solid var(--clr-office-muted);
+    box-shadow: var(--shadow-lg);
+}
+.ai-left::before, .ai-right::before {
+    background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
+}
+
+.ai-card {
+    background: var(--clr-bg-card);
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.ai-card.danger {
+    background: linear-gradient(135deg, var(--clr-bg-card), rgba(229, 57, 53, 0.15));
+    border-color: rgba(229, 57, 53, 0.3);
+}
+.ai-card.good {
+    background: linear-gradient(135deg, var(--clr-bg-card), rgba(0, 191, 165, 0.15));
+    border-color: rgba(0, 191, 165, 0.3);
+}
+
+/* Chatbot UI */
+#aiChat {
+    background: rgba(17, 24, 32, 0.95);
+    border: 1px solid var(--clr-office-muted);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+}
+.chat-msg {
+    margin-bottom: 15px;
+    display: block; /* Fixed from previous session */
+    width: 100%;
+    clear: both;
+}
+.chat-msg.bot {
+    text-align: left;
+}
+.chat-msg.user {
+    text-align: right;
+}
+.chat-msg .msg-content {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 85%;
+    word-wrap: break-word;
+    text-align: left;
+}
+.chat-msg.bot .msg-content {
+    background: rgba(42, 58, 80, 0.7); /* Office steel muted */
+    color: var(--clr-text);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.chat-msg.user .msg-content {
+    background: linear-gradient(135deg, var(--clr-accent-muted), rgba(0, 191, 165, 0.15));
+    color: var(--clr-accent-bright);
+    border: 1px solid rgba(0, 191, 165, 0.2);
+}
+.chat-msg.bot b {
+    color: var(--clr-accent-bright);
+}
+
+/* Buttons */
+.mbtn, .a-btn {
+    background: var(--clr-office-steel);
+    color: var(--clr-text);
+    border: 1px solid var(--clr-office-muted);
+}
+.mbtn:hover, .a-btn:hover {
+    background: var(--clr-accent-muted);
+    border-color: var(--clr-accent);
+    box-shadow: var(--shadow-glow-accent);
+}
+.start-btn {
+    background: linear-gradient(135deg, var(--clr-danger-soft), var(--clr-danger));
+    box-shadow: var(--shadow-glow-danger);
+    color: white;
+}
+
+/* Inputs */
+input[type="text"], input[type="number"], select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--clr-office-muted);
+    color: var(--clr-text);
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    border-color: var(--clr-accent);
+    box-shadow: 0 0 0 2px var(--clr-accent-glow);
+}
+
+/* Typographic hierarchy */
+h1, h2, h3, .card-val {
+    font-family: var(--font-display);
+    font-weight: 800;
+}
+.card-val {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Welcome Message Refactor */
+.chat-disclaimer-box {
+    background: rgba(229, 57, 53, 0.08);
+    border: 1px solid rgba(229, 57, 53, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #ff8a65;
+    line-height: 1.5;
+}
+.chat-disclaimer-box .disclaimer-title {
+    text-align: center;
+    margin-bottom: 6px;
+    color: #e53935;
+}
+.chat-welcome-text {
+    font-size: 13px;
+    font-weight: 400;
+    color: #b0bec5;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+.chat-tips-list {
+    margin: 0 0 14px 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.chat-tips-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #b0bec5;
+    line-height: 1.5;
+}
+.chat-tips-list li .icon {
+    flex-shrink: 0;
+}
+.chat-welcome-question {
+    font-style: italic;
+    color: #eceff1;
+    font-size: 13px;
+}
