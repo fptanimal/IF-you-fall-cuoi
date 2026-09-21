@@ -162,7 +162,7 @@ async function sendChatMessage() {
             throw new Error('Empty response from API');
         }
 
-        var formattedText = '<em style="color:#00e676;font-size:10px;">🟢 Online (AI)</em><br>' + formatAIResponse(aiText);
+        var formattedText = '<em style="color:#00e676;font-size:10px;">🟢 Online (Gemini AI)</em><br>' + formatAIResponse(aiText);
         appendChatMsg(formattedText, 'bot');
         chatHistory.push({ role: 'assistant', content: aiText });
         SFX.aibeep();
