@@ -854,7 +854,7 @@ var PixelIntro = (function () {
     familyImg.src = 'assets/family.png';
     
     var lanLoreImg = new Image();
-    lanLoreImg.src = 'assets/lore_lan_portrait_magenta.png?v=2';
+    lanLoreImg.src = 'assets/lore_lan_portrait_magenta_v2.png?v=3';
 
     function drawPixelFamily(ctx, px, py, scale) {
         var artToDraw = FAMILY_ART;
