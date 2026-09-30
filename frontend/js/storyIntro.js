@@ -856,6 +856,9 @@ var PixelIntro = (function () {
     var lanLoreImg = new Image();
     lanLoreImg.src = 'assets/lore_lan_portrait_final.png?v=4';
 
+    var hungLoreImg = new Image();
+    hungLoreImg.src = 'assets/lore_hung_portrait.png?v=1';
+
     function drawPixelFamily(ctx, px, py, scale) {
         var artToDraw = FAMILY_ART;
         if (typeof G !== 'undefined') {
@@ -877,6 +880,23 @@ var PixelIntro = (function () {
             var drawY = py + (40 - targetH) / 2;
             
             ctx.drawImage(lanLoreImg, drawX, drawY, targetW, targetH);
+            ctx.restore();
+            return;
+        }
+        
+        if (artToDraw === HUNG_ART && hungLoreImg && hungLoreImg.complete && hungLoreImg.naturalWidth > 0) {
+            ctx.save();
+            ctx.imageSmoothingEnabled = false;
+            var imgW = hungLoreImg.naturalWidth;
+            var imgH = hungLoreImg.naturalHeight;
+            
+            // Match Minh and Lan's scale logic exactly
+            var targetW = 68;
+            var targetH = targetW * (imgH / imgW);
+            var drawX = px + (90 - targetW) / 2;
+            var drawY = py + (40 - targetH) / 2;
+            
+            ctx.drawImage(hungLoreImg, drawX, drawY, targetW, targetH);
             ctx.restore();
             return;
         }
