@@ -850,6 +850,12 @@ var PixelIntro = (function () {
         "  #eeeeeeeeeeeeeeeeeeeeeee# #eee111eee#      "
     ];
 
+    var familyImg = new Image();
+    familyImg.src = 'assets/family.png';
+    
+    var lanLoreImg = new Image();
+    lanLoreImg.src = 'assets/lore_lan_portrait.png';
+
     function drawPixelFamily(ctx, px, py, scale) {
         var artToDraw = FAMILY_ART;
         if (typeof G !== 'undefined') {
@@ -858,6 +864,46 @@ var PixelIntro = (function () {
             else if (G.character === 'khanh') artToDraw = KHANH_ART;
         }
         
+        if (artToDraw === LAN_ART && lanLoreImg && lanLoreImg.complete && lanLoreImg.naturalWidth > 0) {
+            ctx.save();
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(lanLoreImg, px, py, 45 * scale, 23 * scale);
+            ctx.restore();
+            return;
+        }
+        
+        if (artToDraw === FAMILY_ART && familyImg && familyImg.complete && familyImg.naturalWidth > 0) {
+            ctx.save();
+            var imgW = familyImg.naturalWidth;
+            var imgH = familyImg.naturalHeight;
+            
+            if (scale === 1.0) {
+                // Desk photo frame (46x48 clipping box)
+                // We'll scale it slightly wider so the empty space at the top is pushed out,
+                // and the characters fill the frame nicely.
+                var targetW = 55;
+                var targetH = targetW * (imgH / imgW);
+                // Center horizontally
+                var drawX = px + (46 - targetW) / 2;
+                // Rest at the bottom
+                var bottomY = py + 23;
+                var drawY = bottomY - targetH + (targetH * 0.05); // shift down slightly so bottom edge is hidden
+                ctx.drawImage(familyImg, drawX, drawY, targetW, targetH);
+            } else {
+                // CRT Portrait (90x40 clipping box)
+                // Scale width to 65 instead of 90 to fit more height (bodies) into the 40px box
+                var targetW = 68;
+                var targetH = targetW * (imgH / imgW);
+                // Center horizontally in the 90px box
+                var drawX = px + (90 - targetW) / 2;
+                // The image has about 22% empty space at the top. We shift it up to hide it.
+                var shiftY = targetH * 0.22;
+                ctx.drawImage(familyImg, drawX, py - shiftY, targetW, targetH);
+            }
+            ctx.restore();
+            return;
+        }
+
         ctx.save();
         ctx.translate(px, py);
         for (var r = 0; r < artToDraw.length; r++) {
