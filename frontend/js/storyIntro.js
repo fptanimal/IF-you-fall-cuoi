@@ -854,7 +854,7 @@ var PixelIntro = (function () {
     familyImg.src = 'assets/family.png';
     
     var lanLoreImg = new Image();
-    lanLoreImg.src = 'assets/lore_lan_portrait_magenta_v2.png?v=3';
+    lanLoreImg.src = 'assets/lore_lan_portrait_final.png?v=4';
 
     function drawPixelFamily(ctx, px, py, scale) {
         var artToDraw = FAMILY_ART;
@@ -867,7 +867,21 @@ var PixelIntro = (function () {
         if (artToDraw === LAN_ART && lanLoreImg && lanLoreImg.complete && lanLoreImg.naturalWidth > 0) {
             ctx.save();
             ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(lanLoreImg, px, py, 45 * scale, 23 * scale);
+            var boxW = 45 * scale;
+            var boxH = 23 * scale;
+            var imgW = lanLoreImg.naturalWidth;
+            var imgH = lanLoreImg.naturalHeight;
+            
+            // Calculate uniform scale factor to fit within box
+            var scaleRatio = Math.min(boxW / imgW, boxH / imgH);
+            var drawW = Math.round(imgW * scaleRatio);
+            var drawH = Math.round(imgH * scaleRatio);
+            
+            // Center the image in the box
+            var drawX = Math.round(px + (boxW - drawW) / 2);
+            var drawY = Math.round(py + (boxH - drawH) / 2);
+            
+            ctx.drawImage(lanLoreImg, drawX, drawY, drawW, drawH);
             ctx.restore();
             return;
         }
