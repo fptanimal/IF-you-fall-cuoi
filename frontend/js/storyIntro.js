@@ -867,21 +867,16 @@ var PixelIntro = (function () {
         if (artToDraw === LAN_ART && lanLoreImg && lanLoreImg.complete && lanLoreImg.naturalWidth > 0) {
             ctx.save();
             ctx.imageSmoothingEnabled = false;
-            var boxW = 45 * scale;
-            var boxH = 23 * scale;
             var imgW = lanLoreImg.naturalWidth;
             var imgH = lanLoreImg.naturalHeight;
             
-            // Calculate uniform scale factor to fit within box
-            var scaleRatio = Math.min(boxW / imgW, boxH / imgH);
-            var drawW = Math.round(imgW * scaleRatio);
-            var drawH = Math.round(imgH * scaleRatio);
+            // Match Minh's scale logic exactly
+            var targetW = 68;
+            var targetH = targetW * (imgH / imgW);
+            var drawX = px + (90 - targetW) / 2;
+            var drawY = py + (40 - targetH) / 2;
             
-            // Center the image in the box
-            var drawX = Math.round(px + (boxW - drawW) / 2);
-            var drawY = Math.round(py + (boxH - drawH) / 2);
-            
-            ctx.drawImage(lanLoreImg, drawX, drawY, drawW, drawH);
+            ctx.drawImage(lanLoreImg, drawX, drawY, targetW, targetH);
             ctx.restore();
             return;
         }
