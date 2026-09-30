@@ -1,5 +1,13 @@
 {
   "name": "ifyoufallhuhu",
   "version": "1.0.0",
-  "main": "api/chat.js"
+  "main": "api/chat.js",
+  "dependencies": {
+    "canvas": "^3.2.3",
+    "jimp": "^1.6.1",
+    "puppeteer": "^25.12.0"
+  },
+  "scripts": {
+    "dev": "npx http-server -p 8080 -c-1"
+  }
 }

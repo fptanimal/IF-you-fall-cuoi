@@ -1102,6 +1102,8 @@ function updateLocList() {
 
 // ── INPUT ────────────────────────────────────────────
 document.addEventListener('keydown', function (e) {
+    if (e.key === ']') { window.PLAYER_HEIGHT = (window.PLAYER_HEIGHT || 2.3) + 0.1; console.log("PLAYER_HEIGHT:", window.PLAYER_HEIGHT); }
+    if (e.key === '[') { window.PLAYER_HEIGHT = (window.PLAYER_HEIGHT || 2.3) - 0.1; console.log("PLAYER_HEIGHT:", window.PLAYER_HEIGHT); }
     G.keys[e.key.toLowerCase()] = true;
     if (e.key.toLowerCase() === 'e' && !G.modalOpen && !G.evOpen) { interact(); }
     if (e.key.toLowerCase() === 'f' && !G.modalOpen && !G.evOpen) { mInventory(); }
@@ -2563,6 +2565,182 @@ function updateHUD() {
     else tip.classList.remove('on');
 }
 
+
+
+// ── SPRITE GENERATOR (12-FRAME SYSTEM & ANIMATIONS) ─────────────────────
+const SpriteGen = {
+    cache: {},
+    getCharSprite: function(name, color, weight) {
+        var key = name + '_' + color + '_' + weight;
+        if (this.cache[key]) return this.cache[key];
+        var c = document.createElement('canvas'); c.width = 96; c.height = 192; var x = c.getContext('2d');
+        for(let dir=0; dir<4; dir++) {
+            for(let fr=0; fr<3; fr++) {
+                let px = fr * 32, py = dir * 48; x.save(); x.translate(px + 16, py + 24);
+                let isMoving = (fr !== 1), sz = 16, step = isMoving ? (fr===0?-1:1)*3 : 0;
+                x.fillStyle = '#0f172a';
+                if(dir === 1) { x.fillRect(-4, sz*0.3 - (fr===0?step:0), 6, sz*0.6 + (fr===0?step:0)); x.fillRect(0, sz*0.3 + (fr===2?step:0), 6, sz*0.6 - (fr===2?step:0)); }
+                else if(dir === 2) { x.fillRect(0, sz*0.3 - (fr===0?step:0), 6, sz*0.6 + (fr===0?step:0)); x.fillRect(-4, sz*0.3 + (fr===2?step:0), 6, sz*0.6 - (fr===2?step:0)); }
+                else { x.fillRect(-6, sz*0.3 - step, 5, sz*0.6 + step); x.fillRect(1, sz*0.3 + step, 5, sz*0.6 - step); }
+                let bodyW = sz * 0.9;
+                if(weight && weight > 50) bodyW = sz * (0.85 + (weight - 50) / 50 * 0.55);
+                if(name === 'Player' && typeof G !== 'undefined' && G.character === 'hung') bodyW = sz * 0.75;
+                x.fillStyle = color; x.fillRect(-bodyW*0.5, -sz*0.3, bodyW, sz*0.65);
+                x.fillStyle = '#fcd34d'; x.fillRect(-sz*0.4, -sz*0.9, sz*0.8, sz*0.7);
+                if(dir === 0) { x.fillStyle = '#1e293b'; x.fillRect(-4, -sz*0.6, 2, 2); x.fillRect(2, -sz*0.6, 2, 2); }
+                else if(dir === 1) { x.fillStyle = '#1e293b'; x.fillRect(-5, -sz*0.6, 2, 2); }
+                else if(dir === 2) { x.fillStyle = '#1e293b'; x.fillRect(3, -sz*0.6, 2, 2); }
+                x.fillStyle = '#451a03'; if (name === 'Game Thủ') x.fillStyle = '#064e3b'; else if (name === 'Bác sĩ Nam') x.fillStyle = '#1e293b';
+                if(dir === 0 || dir === 3) x.fillRect(-sz*0.4, -sz*0.95, sz*0.8, sz*0.3);
+                else if(dir === 1) x.fillRect(-sz*0.2, -sz*0.95, sz*0.6, sz*0.3);
+                else x.fillRect(-sz*0.4, -sz*0.95, sz*0.6, sz*0.3);
+                let armCol = color; if (name === 'Bác sĩ Nam') armCol = '#f8fafc';
+                x.fillStyle = armCol; let aStep = isMoving ? (fr===0?1:-1)*3 : 0;
+                if(dir === 0 || dir === 3) { x.fillRect(-bodyW*0.5 - 4, -sz*0.3 + aStep, 4, sz*0.6); x.fillRect(bodyW*0.5, -sz*0.3 - aStep, 4, sz*0.6); }
+                else if(dir === 1) x.fillRect(-2, -sz*0.3 + aStep, 6, sz*0.6);
+                else x.fillRect(-4, -sz*0.3 + aStep, 6, sz*0.6);
+                x.restore();
+            }
+        }
+        this.cache[key] = c; return c;
+    },
+    getSewingMachine: function() {
+        if(this.cache.sewing) return this.cache.sewing;
+        var c = document.createElement('canvas'); c.width = 128; c.height = 32; var x = c.getContext('2d');
+        for(let i=0; i<4; i++) {
+            let px = i * 32;
+            x.fillStyle = '#1e293b'; x.fillRect(px + 2, 24, 28, 6);
+            x.fillRect(px + 24, 6, 4, 18); x.fillRect(px + 4, 6, 20, 6);
+            x.fillStyle = '#cbd5e1'; let ndl = (i % 2 === 0) ? 0 : 4; x.fillRect(px + 6, 12, 2, 8 + ndl);
+            x.fillStyle = '#475569'; x.beginPath(); x.arc(px + 26, 15, 6, 0, Math.PI*2); x.fill();
+            x.fillStyle = '#cbd5e1'; let a = i * Math.PI / 2; x.beginPath(); x.arc(px + 26 + Math.cos(a)*3, 15 + Math.sin(a)*3, 2, 0, Math.PI*2); x.fill();
+        }
+        this.cache.sewing = c; return c;
+    },
+    getCodingDesk: function() {
+        if(this.cache.coding) return this.cache.coding;
+        var c = document.createElement('canvas'); c.width = 256; c.height = 64; var x = c.getContext('2d');
+        for(let i=0; i<4; i++) {
+            let px = i * 64;
+            // Desk
+            x.fillStyle = '#334155'; x.fillRect(px + 8, 32, 48, 6); x.fillRect(px + 12, 38, 4, 24); x.fillRect(px + 48, 38, 4, 24);
+            // 2 Monitors
+            x.fillStyle = '#0f172a'; x.fillRect(px + 4, 8, 26, 18); x.fillRect(px + 34, 8, 26, 18);
+            x.fillStyle = '#475569'; x.fillRect(px + 14, 26, 6, 6); x.fillRect(px + 44, 26, 6, 6);
+            // Matrix Code
+            x.fillStyle = '#10b981';
+            let line1 = (i % 4) * 2; let line2 = ((i+2) % 4) * 2;
+            x.fillRect(px + 6, 10 + line1, 22, 2); x.fillRect(px + 6, 14 + line2, 18, 2); x.fillRect(px + 6, 18 + line1, 20, 2);
+            x.fillRect(px + 36, 10 + line2, 22, 2); x.fillRect(px + 36, 14 + line1, 14, 2); x.fillRect(px + 36, 18 + line2, 22, 2);
+            // Programmer (Back view)
+            x.fillStyle = '#1d4ed8'; x.fillRect(px + 24, 28, 16, 20); // body
+            x.fillStyle = '#fcd34d'; x.fillRect(px + 26, 16, 12, 12); // head
+            x.fillStyle = '#451a03'; x.fillRect(px + 26, 16, 12, 6); // hair
+        }
+        this.cache.coding = c; return c;
+    },
+    getBossDesk: function() {
+        if(this.cache.boss) return this.cache.boss;
+        var c = document.createElement('canvas'); c.width = 256; c.height = 64; var x = c.getContext('2d');
+        for(let i=0; i<4; i++) {
+            let px = i * 64;
+            // Wood Desk
+            x.fillStyle = '#78350f'; x.fillRect(px + 4, 36, 56, 8); x.fillRect(px + 8, 44, 6, 20); x.fillRect(px + 50, 44, 6, 20);
+            // Documents
+            x.fillStyle = '#f8fafc'; x.fillRect(px + 20, 32, 24, 4);
+            x.fillStyle = '#ef4444'; x.fillRect(px + 46, 32, 6, 4); // stamp pad
+            // Boss (Front view)
+            x.fillStyle = '#cbd5e1'; x.fillRect(px + 22, 16, 20, 20); // body
+            x.fillStyle = '#fcd34d'; x.fillRect(px + 26, 4, 12, 12); // head
+            x.fillStyle = '#1e293b'; x.fillRect(px + 28, 8, 2, 2); x.fillRect(px + 34, 8, 2, 2); // eyes
+            // Arm signing
+            x.fillStyle = '#cbd5e1';
+            let armX = px + 28 + (i % 2 === 0 ? 2 : -2);
+            let armY = 30 + (i % 2 === 0 ? 0 : 2);
+            x.fillRect(armX, armY, 14, 4);
+            // Stamp action
+            if(i === 3) { x.fillStyle = '#ef4444'; x.fillRect(px + 26, 32, 4, 2); }
+        }
+        this.cache.boss = c; return c;
+    },
+    getGamingSetup: function() {
+        if(this.cache.gaming) return this.cache.gaming;
+        var c = document.createElement('canvas'); c.width = 256; c.height = 64; var x = c.getContext('2d');
+        for(let i=0; i<4; i++) {
+            let px = i * 64;
+            // Desk
+            x.fillStyle = '#1e293b'; x.fillRect(px + 8, 36, 48, 6);
+            // RGB Monitor
+            let rCol = i%3===0?'#ef4444':(i%3===1?'#3b82f6':'#10b981');
+            x.fillStyle = rCol; x.fillRect(px + 10, 8, 44, 24); // glow
+            x.fillStyle = '#0f172a'; x.fillRect(px + 12, 10, 40, 20); // screen
+            x.fillStyle = '#f59e0b'; x.fillRect(px + 16, 14 + (i%2)*2, 6, 6); x.fillRect(px + 26, 22 - (i%2)*2, 8, 4); // game shapes
+            // Gamer
+            x.fillStyle = '#f59e0b'; x.fillRect(px + 24, 26, 16, 20); // body
+            x.fillStyle = '#fcd34d'; x.fillRect(px + 26, 14, 12, 12); // head
+            // Headset
+            x.fillStyle = rCol; x.fillRect(px + 24, 16, 4, 8); x.fillRect(px + 36, 16, 4, 8); x.fillRect(px + 24, 12, 16, 4);
+        }
+        this.cache.gaming = c; return c;
+    },
+    getBed: function() {
+        if(this.cache.bed) return this.cache.bed;
+        var c = document.createElement('canvas'); c.width = 256; c.height = 64; var x = c.getContext('2d');
+        for(let i=0; i<4; i++) {
+            let px = i * 64;
+            // Bed frame
+            x.fillStyle = '#451a03'; x.fillRect(px + 8, 40, 48, 8); x.fillRect(px + 4, 32, 6, 20); x.fillRect(px + 54, 40, 6, 12);
+            // Mattress & Pillow
+            x.fillStyle = '#f8fafc'; x.fillRect(px + 10, 36, 44, 4); x.fillRect(px + 12, 32, 10, 6);
+            // Blanket & Head
+            x.fillStyle = '#3b82f6'; x.fillRect(px + 22, 34, 32, 8);
+            x.fillStyle = '#fcd34d'; x.beginPath(); x.arc(px + 17, 35, 5, 0, Math.PI*2); x.fill();
+            // Zzz
+            x.fillStyle = '#94a3b8'; x.font = 'bold 12px Arial';
+            if(i%4 >= 1) x.fillText('z', px + 22, 28);
+            if(i%4 >= 2) x.fillText('Z', px + 30, 20);
+            if(i%4 >= 3) x.fillText('Z', px + 40, 10);
+        }
+        this.cache.bed = c; return c;
+    },
+    getGym: function() {
+        if(this.cache.gym) return this.cache.gym;
+        var c = document.createElement('canvas'); c.width = 256; c.height = 64; var x = c.getContext('2d');
+        for(let i=0; i<4; i++) {
+            let px = i * 64;
+            // Bench
+            x.fillStyle = '#1e293b'; x.fillRect(px + 16, 40, 32, 6); x.fillRect(px + 20, 46, 4, 10); x.fillRect(px + 40, 46, 4, 10);
+            // Player
+            x.fillStyle = '#ef4444'; x.fillRect(px + 26, 20, 12, 20); // body
+            x.fillStyle = '#fcd34d'; x.fillRect(px + 26, 8, 12, 12); // head
+            // Dumbbells
+            x.fillStyle = '#475569';
+            let dy = i%2 === 0 ? 0 : 8; // move up and down
+            // Left
+            x.fillRect(px + 16, 20 + dy, 4, 8); x.fillRect(px + 20, 22 + dy, 6, 4);
+            // Right
+            x.fillRect(px + 44, 20 + dy, 4, 8); x.fillRect(px + 38, 22 + dy, 6, 4);
+        }
+        this.cache.gym = c; return c;
+    },
+    getHospital: function() {
+        if(this.cache.hosp) return this.cache.hosp;
+        var c = document.createElement('canvas'); c.width = 256; c.height = 64; var x = c.getContext('2d');
+        for(let i=0; i<4; i++) {
+            let px = i * 64;
+            // Cross
+            x.fillStyle = '#ef4444'; x.fillRect(px + 26, 12, 12, 32); x.fillRect(px + 16, 22, 32, 12);
+            // EKG Line
+            x.strokeStyle = '#10b981'; x.lineWidth = 2; x.beginPath();
+            x.moveTo(px + 4, 52); x.lineTo(px + 20, 52);
+            if(i%2===0) { x.lineTo(px + 28, 32); x.lineTo(px + 36, 62); x.lineTo(px + 44, 52); }
+            else { x.lineTo(px + 32, 42); x.lineTo(px + 40, 52); }
+            x.lineTo(px + 60, 52); x.stroke();
+        }
+        this.cache.hosp = c; return c;
+    }
+};
+
 // ── GAME LOOP ────────────────────────────────────────
 var gc = document.getElementById('gameCanvas'), gx = gc.getContext('2d');
 var lstStep = 0;
@@ -2627,6 +2805,23 @@ function updPlayer() {
     if (G.keys['d'] || G.keys['arrowright']) dx = p.spd;
     if (dx && dy) { dx *= .707; dy *= .707; }
     p.moving = !!(dx || dy);
+    
+    // Direction & Frame animation (12 Frames logic)
+    if(p.dir === undefined) { p.dir = 0; p.frame = 1; p.animTick = 0; }
+    if(dy > 0) p.dir = 0;
+    else if(dy < 0) p.dir = 3;
+    else if(dx < 0) p.dir = 1;
+    else if(dx > 0) p.dir = 2;
+    
+    if(p.moving) {
+        p.animTick++;
+        if(p.animTick > 8) {
+            p.frame = (p.frame + 1) % 4;
+            p.animTick = 0;
+        }
+    } else {
+        p.frame = 1; // Stand
+    }
     var oldX = p.x, oldY = p.y;
     // Try move X first
     var newX = Math.max(20, Math.min(G.mapW - 20, p.x + dx));
@@ -2684,6 +2879,16 @@ function updNPCs() {
             if (d > 2) {
                 var nx = n.x + dx / d * n.spd;
                 var ny = n.y + dy / d * n.spd;
+                
+                if(n.dir === undefined) { n.dir = 0; n.frame = 1; n.animTick = 0; }
+                if(dy > Math.abs(dx)) n.dir = 0;
+                else if(dy < -Math.abs(dx)) n.dir = 3;
+                else if(dx < 0) n.dir = 1;
+                else if(dx > 0) n.dir = 2;
+                
+                n.animTick++;
+                if(n.animTick > 10) { n.frame = (n.frame + 1) % 4; n.animTick = 0; }
+                n.moving = true;
                 // Check collision before moving
                 if (!npcCollidesBuilding(nx, ny) && !isOnRoad(nx, ny)) {
                     n.x = nx; n.y = ny;
@@ -3335,172 +3540,137 @@ function drawMed3D(cx, cy) {
     gx.strokeStyle = '#e63946'; gx.lineWidth = 2.5; gx.beginPath(); gx.moveTo(cx, cy - 16); gx.lineTo(cx, cy + 2); gx.stroke();
     gx.beginPath(); gx.moveTo(cx - 9, cy - 7); gx.lineTo(cx + 9, cy - 7); gx.stroke();
 }
-function drawChar(cx, cy, sz, col, moving, isP, fatigue, hp, name) {
-    var t = Date.now() / 1000, by = moving ? Math.sin(t * 12) * 2 : 0; cy += by;
-    var tired = fatigue > 60, critical = fatigue > 85 || hp < 20;
-
-    gx.save();
-    // Drop shadow for character
-    gx.shadowColor = 'rgba(0,0,0,0.5)';
-    gx.shadowBlur = 4;
-    gx.shadowOffsetY = 4;
-
-    // Legs (Stepping animation)
-    var step = moving ? Math.sin(t * 12) * (sz * 0.35) : 0;
-    gx.fillStyle = '#0f172a'; // Pants / Shoes
-    gx.fillRect(cx - sz * 0.3, cy + sz * 0.3 - step, sz * 0.25, sz * 0.6 + step);
-    gx.fillRect(cx + sz * 0.05, cy + sz * 0.3 + step, sz * 0.25, sz * 0.6 - step);
-
-    // Block Body
-    var bodyW = sz * 0.9;
-    var bodyH = sz * 0.65;
+function drawChar(cx, cy, sz, col, moving, isP, fatigue, hp, name, npcObj) {
+    var activeSpriteData = window.playerSpriteData;
+    var isLan = false, isMinh = false, isHung = false, isKhanh = false;
     if (isP && typeof G !== 'undefined') {
-        if (G.character === 'khanh') {
-            // Body width thay đổi theo cân nặng: 50kg -> sz*0.85, 100kg -> sz*1.4
-            var w = G.khanhWeight || 100;
-            bodyW = sz * (0.85 + (w - 50) / 50 * 0.55);
-            col = '#cbd5e1'; // Áo nhạt
-        }
-        if (G.character === 'hung') { bodyW = sz * 0.75; col = '#f59e0b'; } // Gầy, áo thun vàng
-        if (G.character === 'lan') { col = '#ec4899'; } // Áo hồng
+        if (G.character === 'lan') { activeSpriteData = window.lanSpriteData; isLan = true; }
+        else if (G.character === 'minh') { activeSpriteData = window.minhSpriteData; isMinh = true; }
+        else if (G.character === 'hung') { activeSpriteData = window.hungSpriteData; isHung = true; }
+        else if (G.character === 'khanh') { activeSpriteData = window.khanhSpriteData; isKhanh = true; }
     }
+    var useLan = isLan;
 
-    gx.fillStyle = col;
-    gx.fillRect(cx - bodyW * 0.5, cy - sz * 0.3, bodyW, bodyH);
-    gx.shadowColor = 'transparent'; // Turn off shadow for internal shading
-    gx.fillStyle = 'rgba(0,0,0,0.2)'; // Body shading
-    gx.fillRect(cx + bodyW * 0.1, cy - sz * 0.3, bodyW * 0.4, bodyH);
-
-    // Accessories based on name
-    if (name === 'Bác sĩ Nam') {
-        gx.fillStyle = '#f8fafc'; // White coat
-        gx.fillRect(cx - sz * 0.45, cy - sz * 0.3, sz * 0.9, sz * 0.75);
-        gx.fillStyle = '#38bdf8'; // scrubs under
-        gx.fillRect(cx - sz * 0.1, cy - sz * 0.3, sz * 0.2, sz * 0.5);
-        gx.fillStyle = '#ef4444'; // stethoscope
-        gx.fillRect(cx - sz * 0.2, cy - sz * 0.2, sz * 0.1, sz * 0.3);
-        gx.fillRect(cx - sz * 0.2, cy + sz * 0.1, sz * 0.4, sz * 0.1);
-    } else if (name === 'Game Thủ') {
-        gx.fillStyle = '#10b981'; // Green hoodie
-        gx.fillRect(cx - sz * 0.45, cy - sz * 0.3, sz * 0.9, sz * 0.65);
-        gx.fillStyle = '#064e3b'; // hood
-        gx.fillRect(cx - sz * 0.45, cy - sz * 0.4, sz * 0.9, sz * 0.2);
-    } else if (name === 'Sếp Tổng') {
-        gx.fillStyle = '#1e293b'; // dark suit
-        gx.fillRect(cx - sz * 0.45, cy - sz * 0.3, sz * 0.9, sz * 0.65);
-        gx.fillStyle = '#fff'; // shirt piece
-        gx.fillRect(cx - sz * 0.15, cy - sz * 0.3, sz * 0.3, sz * 0.3);
-        gx.fillStyle = '#f59e0b'; // golden tie
-        gx.fillRect(cx - sz * 0.05, cy - sz * 0.2, sz * 0.1, sz * 0.4);
-    }
-
-    // Arms
-    var armM = moving ? Math.cos(t * 12) * (sz * 0.3) : 0;
-    var armCol = (name === 'Bác sĩ Nam') ? '#f8fafc' : col; // white coat arms
-    if (name === 'Sếp Tổng') armCol = '#1e293b';
-    gx.fillStyle = armCol;
-    gx.fillRect(cx - bodyW * 0.5 - sz * 0.25, cy - sz * 0.2 + armM, sz * 0.25, sz * 0.45);
-    gx.fillRect(cx + bodyW * 0.5, cy - sz * 0.2 - armM, sz * 0.25, sz * 0.45);
-
-    // Hands (Blocky skin)
-    var skinC = critical ? '#fca5a5' : tired ? '#fdba74' : '#fcd34d';
-    gx.fillStyle = skinC;
-    gx.fillRect(cx - bodyW * 0.5 - sz * 0.2, cy + sz * 0.25 + armM, sz * 0.18, sz * 0.15); // Left hand
-    gx.fillRect(cx + bodyW * 0.5 + sz * 0.02, cy + sz * 0.25 - armM, sz * 0.18, sz * 0.15); // Right hand
-
-    // Head setup & Outlines
-    var tilt = critical ? Math.sin(t * 3) * 0.1 : tired ? Math.sin(t * 1.5) * 0.05 : 0;
-    gx.translate(cx, cy - sz * 0.7); gx.rotate(tilt);
-
-    // Draw thick outline around head to pop
-    gx.fillStyle = '#0f172a';
-    gx.fillRect(-sz * 0.45, -sz * 0.5, sz * 0.9, sz * 0.85);
-
-    gx.fillStyle = skinC;
-    gx.fillRect(-sz * 0.4, -sz * 0.45, sz * 0.8, sz * 0.75);
-
-    // Hair
-    gx.fillStyle = '#1e140f'; // Dark blocky hair
-    if (name === 'Game Thủ') gx.fillStyle = '#ef4444'; // Red hair
-    if (isP && typeof G !== 'undefined') {
-        if (G.character === 'lan') {
-            gx.fillRect(-sz * 0.45, -sz * 0.5, sz * 0.9, sz * 0.25);
-            gx.fillRect(-sz * 0.55, -sz * 0.25, sz * 0.2, sz * 0.7); // long hair L
-            gx.fillRect(sz * 0.35, -sz * 0.25, sz * 0.2, sz * 0.7); // long hair R
-        } else if (G.character === 'hung') {
-            gx.fillRect(-sz * 0.45, -sz * 0.5, sz * 0.9, sz * 0.3); // Thicker hair
-            gx.fillRect(-sz * 0.5, -sz * 0.2, sz * 0.15, sz * 0.2); // messy sideburn
-            gx.fillRect(sz * 0.35, -sz * 0.2, sz * 0.15, sz * 0.2);
-        } else {
-            gx.fillRect(-sz * 0.45, -sz * 0.5, sz * 0.9, sz * 0.25);
-            gx.fillRect(-sz * 0.45, -sz * 0.25, sz * 0.2, sz * 0.2); // Sideburn L
-            gx.fillRect(sz * 0.25, -sz * 0.25, sz * 0.2, sz * 0.2); // Sideburn R
-        }
-    } else {
-        gx.fillRect(-sz * 0.45, -sz * 0.5, sz * 0.9, sz * 0.25);
-        gx.fillRect(-sz * 0.45, -sz * 0.25, sz * 0.2, sz * 0.2); // Sideburn L
-        gx.fillRect(sz * 0.25, -sz * 0.25, sz * 0.2, sz * 0.2); // Sideburn R
-    }
-
-    // Glasses for Hung
-    if (isP && typeof G !== 'undefined' && G.character === 'hung') {
-        gx.fillStyle = '#111'; // Gọng kính
-        gx.fillRect(-sz * 0.3, -sz * 0.18, sz * 0.25, sz * 0.2); // Mắt trái
-        gx.fillRect(sz * 0.05, -sz * 0.18, sz * 0.25, sz * 0.2); // Mắt phải
-        gx.fillRect(-sz * 0.05, -sz * 0.1, sz * 0.1, sz * 0.05); // Cầu kính
-    }
-
-    // Game Thủ Headphones
-    if (name === 'Game Thủ') {
-        gx.fillStyle = '#1e293b';
-        gx.fillRect(-sz * 0.5, -sz * 0.45, sz * 0.15, sz * 0.3); // left ear
-        gx.fillRect(sz * 0.35, -sz * 0.45, sz * 0.15, sz * 0.3); // right ear
-        gx.fillRect(-sz * 0.4, -sz * 0.55, sz * 0.8, sz * 0.1); // headband
-    }
-
-    // Eyes (Pixel blocks)
-    gx.fillStyle = '#fff';
-    gx.fillRect(-sz * 0.25, -sz * 0.15, sz * 0.2, sz * 0.15); // L eye
-    gx.fillRect(sz * 0.05, -sz * 0.15, sz * 0.2, sz * 0.15); // R eye
-    gx.fillStyle = critical ? '#ef4444' : '#000';
-    gx.fillRect(-sz * 0.2, -sz * 0.1, sz * 0.1, sz * 0.1); // L pupil
-    gx.fillRect(sz * 0.1, -sz * 0.1, sz * 0.1, sz * 0.1); // R pupil
-
-    if (tired) {
-        gx.fillStyle = 'rgba(0,0,0,0.3)';
-        gx.fillRect(-sz * 0.25, 0, sz * 0.2, sz * 0.05); // Eye bags
-        gx.fillRect(sz * 0.05, 0, sz * 0.2, sz * 0.05);
-    }
-
-    // Mouth
-    gx.fillStyle = critical ? '#b91c1c' : '#854d0e';
-    gx.fillRect(-sz * 0.1, sz * 0.1, sz * 0.2, sz * 0.08); // Neutral flat mouth
-    gx.restore();
-
-    // Tie or accessory for Player
-    if (isP) {
-        if (typeof G !== 'undefined') {
-            if (G.character === 'lan') {
-                gx.fillStyle = '#fce7f3'; // Light pink scarf
-                gx.fillRect(cx - sz * 0.15, cy - sz * 0.25, sz * 0.3, sz * 0.2);
-            } else if (G.character === 'khanh') {
-                gx.fillStyle = '#3b82f6'; // Blue tie
-                gx.fillRect(cx - sz * 0.1, cy - sz * 0.25, sz * 0.2, sz * 0.45);
-            } else if (G.character === 'hung') {
-                gx.fillStyle = '#1e293b'; // Dây đeo cặp
-                gx.fillRect(cx - sz * 0.3, cy - sz * 0.3, sz * 0.15, sz * 0.6);
-                gx.fillRect(cx + sz * 0.15, cy - sz * 0.3, sz * 0.15, sz * 0.6);
+    if (activeSpriteData) {
+        var frameRow = 0;
+        var frameCol = 1;
+        
+        if (isP) {
+            if (isMinh) {
+                var cycleT = Math.floor(Date.now() / 150);
+                if (G.p.dir === 0) { // DOWN (Row 1)
+                    frameRow = 0;
+                    frameCol = moving ? cycleT % 6 : 0;
+                } else if (G.p.dir === 1) { // LEFT (Swap: use cols 4-6)
+                    frameRow = 1;
+                    frameCol = moving ? 3 + (cycleT % 3) : 3;
+                } else if (G.p.dir === 2) { // RIGHT (Swap: use cols 1-3)
+                    frameRow = 1;
+                    frameCol = moving ? (cycleT % 3) : 0;
+                } else if (G.p.dir === 3) { // UP (Row 3)
+                    frameRow = 2;
+                    frameCol = moving ? cycleT % 6 : 0;
+                }
+            } else if (isHung) {
+                var cycleT_8 = Math.floor(Date.now() / 150);
+                if (G.p.dir === 0) { // DOWN (Row 1, 8 frames)
+                    frameRow = 0;
+                    frameCol = moving ? cycleT_8 % 8 : 0;
+                } else if (G.p.dir === 1) { // LEFT (Row 2, cols 4-7)
+                    frameRow = 1;
+                    frameCol = moving ? 4 + (cycleT_8 % 4) : 4;
+                } else if (G.p.dir === 2) { // RIGHT (Row 2, cols 0-3)
+                    frameRow = 1;
+                    frameCol = moving ? (cycleT_8 % 4) : 0;
+                } else if (G.p.dir === 3) { // UP (Row 3, 8 frames)
+                    frameRow = 2;
+                    frameCol = moving ? cycleT_8 % 8 : 0;
+                }
             } else {
-                gx.fillStyle = '#ef4444';
-                gx.fillRect(cx - sz * 0.1, cy - sz * 0.25, sz * 0.2, sz * 0.45); // Red tie
+                frameRow = G.p.dir || 0;
+                frameCol = [1, 0, 2, 0][G.p.frame || 0];
             }
+        } else if (npcObj) {
+            if (npcObj.dir === undefined) npcObj.dir = 0;
+            if (moving) {
+                var ndx = (npcObj.tx || cx) - cx;
+                var ndy = (npcObj.ty || cy) - cy;
+                if (Math.abs(ndx) > Math.abs(ndy) && Math.abs(ndx) > 0) {
+                    npcObj.dir = ndx > 0 ? 2 : 1;
+                } else if (Math.abs(ndy) > 0) {
+                    npcObj.dir = ndy > 0 ? 0 : 3;
+                }
+                var t = Date.now() / 150;
+                frameCol = [1, 0, 2, 0][Math.floor(t) % 4];
+            } else {
+                var pdx = G.p.x - cx;
+                var pdy = G.p.y - cy;
+                if (pdx*pdx + pdy*pdy < 150*150) {
+                    if (Math.abs(pdx) > Math.abs(pdy)) {
+                        npcObj.dir = pdx > 0 ? 2 : 1;
+                    } else {
+                        npcObj.dir = pdy > 0 ? 0 : 3;
+                    }
+                }
+                frameCol = 1;
+            }
+            frameRow = npcObj.dir;
         }
 
-        // Blocky HP bar floating above
-        var bw = sz * 2.5, bx = cx - bw / 2, by2 = cy - sz * 1.5;
-        gx.fillStyle = '#1e293b'; gx.fillRect(bx, by2, bw, sz * 0.3);
-        var hpC = G.hp > 60 ? '#10b981' : G.hp > 30 ? '#f59e0b' : '#ef4444';
-        gx.fillStyle = hpC; gx.fillRect(bx + 1, by2 + 1, (bw - 2) * (G.hp / 100), sz * 0.3 - 2);
+        var frames = null;
+        if (isP) {
+            frames = activeSpriteData.frames;
+        } else if (window.npcSpriteVariantsList && window.npcSpriteVariantsList.length > 0 && npcObj) {
+            var hash = 0;
+            var nid = String(npcObj.id || npcObj.name || 0);
+            for(var i=0; i<nid.length; i++) hash = hash + nid.charCodeAt(i);
+            frames = window.npcSpriteVariantsList[hash % window.npcSpriteVariantsList.length];
+        }
+        
+        var activeCols = isHung ? 8 : (isMinh || isKhanh ? 6 : 3);
+        var frameCanvas = frames ? frames[frameRow * activeCols + frameCol] : null;
+        if (frameCanvas) {
+            var targetHeight = sz * (useLan ? 2.1 : (isP ? (window.PLAYER_HEIGHT || 2.3) : 2.1));
+            var shadowScale = targetHeight / (sz * 1.7);
+            gx.save();
+            gx.imageSmoothingEnabled = false;
+            gx.fillStyle = 'rgba(0,0,0,0.3)';
+            gx.beginPath();
+            gx.ellipse(cx, cy + sz * 0.8, sz * 0.8 * shadowScale, sz * 0.25 * shadowScale, 0, 0, Math.PI * 2);
+            gx.fill();
+            gx.translate(cx, cy);
+            var sprScale = targetHeight / activeSpriteData.frameHeight;
+            gx.scale(sprScale, sprScale);
+            var groundOffset = (sz * 0.9) / sprScale;
+            var drawX = Math.round(-activeSpriteData.frameWidth / 2);
+            var drawY = Math.round(-activeSpriteData.frameHeight + groundOffset);
+            gx.drawImage(frameCanvas, drawX, drawY);
+            gx.restore();
+            
+            if (isP) {
+                var hpY = Math.round(cy - targetHeight - 6);
+                var bx = Math.round(cx - 12);
+                
+                if (activeSpriteData.bounds) {
+                    var activeCols = isHung ? 8 : (isMinh || isKhanh ? 6 : 3);
+                    var b = activeSpriteData.bounds[frameRow * activeCols + frameCol];
+                    if (b) {
+                        var charCenterInCanvas = b.minX + (b.maxX - b.minX) / 2;
+                        var visCenterX = (drawX + charCenterInCanvas) * sprScale;
+                        bx = Math.round(cx + visCenterX - 12);
+                        
+                        var visTopY = (drawY + b.minY) * sprScale;
+                        hpY = Math.round(cy + visTopY - 6);
+                    }
+                }
+
+                var bw = 24, bh = 4;
+                gx.fillStyle = '#1e293b'; gx.fillRect(bx, hpY, bw, bh);
+                var hpC = hp > 60 ? '#10b981' : hp > 30 ? '#f59e0b' : '#ef4444';
+                gx.fillStyle = hpC; gx.fillRect(bx + 1, hpY + 1, Math.round((bw - 2) * (Math.min(100, Math.max(0, hp)) / 100)), bh - 2);
+            }
+            return;
+        }
     }
 }
 
@@ -3571,9 +3741,23 @@ function render() {
     drawFloor();
     drawTraffic();
     drawObjs();
-    G.npcs.forEach(function (n) { drawChar(n.x, n.y, 16, n.col, !!n.tx, false, 0, 100, n.name); });
     var pCol = (typeof G !== 'undefined' && G.character === 'lan') ? '#d946ef' : '#2a5a9a';
-    drawChar(G.p.x, G.p.y, G.p.sz, pCol, G.p.moving, true, G.fatigue, G.hp, 'Player');
+    
+    // Sort player and NPCs by feet Y position
+    var drawList = [];
+    G.npcs.forEach(function (n) { drawList.push({ type: 'npc', obj: n, y: n.y }); });
+    drawList.push({ type: 'player', y: G.p.y });
+    
+    drawList.sort(function(a, b) { return a.y - b.y; });
+    
+    drawList.forEach(function(item) {
+        if (item.type === 'npc') {
+            var n = item.obj;
+            drawChar(n.x, n.y, 16, n.col, !!n.tx, false, 0, 100, n.name, n);
+        } else {
+            drawChar(G.p.x, G.p.y, G.p.sz, pCol, G.p.moving, true, G.fatigue, G.hp, 'Player', null);
+        }
+    });
     drawP(gx);
     drawEnvironmentEffects();
 
@@ -3617,16 +3801,36 @@ function render() {
 
     // SCREEN SPACE ELEMENTS (HUD, OVERLAYS)
     if (G.fatigue >= 80) { var a2 = ((G.fatigue - 80) / 20) * Math.abs(Math.sin(Date.now() / 500)) * .15; gx.fillStyle = 'rgba(200,0,0,' + a2 + ')'; gx.fillRect(0, 0, 1200, 620); }
-    // Working animation overlay
+            // Working animation overlay
     if (G.workingAnim) {
         G.workAnimTimer--;
         var wa = .6 + Math.sin(Date.now() / 200) * .2;
-        gx.fillStyle = 'rgba(0,0,0,' + (.3 * wa) + ')'; gx.fillRect(0, 0, 1200, 620);
-        gx.font = 'bold 18px Courier New'; gx.textAlign = 'center'; gx.textBaseline = 'middle';
-        gx.fillStyle = 'rgba(255,215,0,' + wa + ')'; gx.fillText('ĐANG LÀM VIỆC...', 600, 310);
-        var dots = '.'.repeat(Math.floor(Date.now() / 300) % 4);
-        gx.font = '12px Courier New'; gx.fillStyle = 'rgba(200,200,255,.6)';
-        gx.fillText('Gõ bàn phím' + dots, 600, 340);
+        gx.fillStyle = 'rgba(0,0,0,' + (.75 * wa) + ')'; gx.fillRect(0, 0, 1200, 620);
+        
+        var lbl = (G.workTimer && G.workTimer.label) ? G.workTimer.label.toLowerCase() : '';
+        var frame = Math.floor(Date.now() / 250) % 4;
+        
+        var sprite = null;
+        var customText = 'ĐANG LÀM VIỆC...';
+        
+        if (lbl.includes('may')) { sprite = SpriteGen.getSewingMachine(); customText = 'ĐANG MAY VÁ...'; }
+        else if (lbl.includes('cày') || lbl.includes('việc')) {
+            if (G.character === 'khanh' || lbl.includes('tài liệu')) { sprite = SpriteGen.getBossDesk(); customText = 'ĐANG KÝ DUYỆT...'; }
+            else { sprite = SpriteGen.getCodingDesk(); customText = 'ĐANG VIẾT CODE...'; }
+        }
+        else if (lbl.includes('game') || lbl.includes('stream')) { sprite = SpriteGen.getGamingSetup(); customText = 'ĐANG CHIẾN GAME...'; }
+        else if (lbl.includes('ngủ') || lbl.includes('sleep')) { sprite = SpriteGen.getBed(); customText = 'ĐANG NGỦ Zzz...'; }
+        else if (lbl.includes('tập') || lbl.includes('exer')) { sprite = SpriteGen.getGym(); customText = 'ĐANG ĐẨY TẠ...'; }
+        else if (lbl.includes('khám') || lbl.includes('bệnh') || lbl.includes('doc')) { sprite = SpriteGen.getHospital(); customText = 'ĐANG KHÁM BỆNH...'; }
+        
+        if (sprite) {
+            gx.drawImage(sprite, frame * 64, 0, 64, 64, 600 - 64, 310 - 80, 128, 128);
+            gx.font = 'bold 24px Courier New'; gx.fillStyle = '#34d399'; gx.textAlign = 'center';
+            gx.fillText(customText, 600, 390);
+        } else {
+            gx.font = 'bold 18px Courier New'; gx.textAlign = 'center'; gx.textBaseline = 'middle';
+            gx.fillStyle = 'rgba(255,215,0,' + wa + ')'; gx.fillText('ĐANG THAO TÁC...', 600, 310);
+        }
     }
 
     // X-Ray Scanning Animation Overlay
@@ -3823,3 +4027,388 @@ function removePersonalContact(index) {
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeEmergencyModal();
 });
+window.SWAP_LEFT_RIGHT = false;
+
+window.lanSpriteData = null;
+var lImg = new Image();
+lImg.src = 'assets/lan_clean.png?v=3';
+lImg.onload = function() {
+    try {
+        var cols = 3, rows = 4, cellW = Math.floor(lImg.width / cols), cellH = Math.floor(lImg.height / rows);
+        var nFrames = [];
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+                var fC = document.createElement('canvas');
+                fC.width = cellW; fC.height = cellH;
+                var fCtx = fC.getContext('2d'); fCtx.imageSmoothingEnabled = false;
+                fCtx.drawImage(lImg, c * cellW, r * cellH, cellW, cellH, 0, 0, cellW, cellH);
+                nFrames.push(fC);
+            }
+        }
+        // Bug 1 fix: hardcode flip using exactly row 2 (which faces RIGHT).
+        // Row 2 is index 1.
+        var rightFrames = [];
+        var leftFrames = [];
+        for (var c = 0; c < cols; c++) {
+            var rFrame = nFrames[1 * 3 + c]; // Row 2 (index 1) faces RIGHT
+            rightFrames.push(rFrame);
+            
+            // Create mirrored copy for LEFT
+            var lFrame = document.createElement('canvas');
+            lFrame.width = cellW; lFrame.height = cellH;
+            var lCtx = lFrame.getContext('2d');
+            lCtx.imageSmoothingEnabled = false;
+            lCtx.translate(cellW, 0);
+            lCtx.scale(-1, 1);
+            lCtx.drawImage(rFrame, 0, 0);
+            leftFrames.push(lFrame);
+        }
+        
+        // Hardcode mapping: dir 1 = Left, dir 2 = Right
+        for (var c = 0; c < cols; c++) {
+            nFrames[1 * 3 + c] = leftFrames[c];  // Left
+            nFrames[2 * 3 + c] = rightFrames[c]; // Right
+        }
+
+        // Calculate bounds
+        var bounds = [];
+        for (var i = 0; i < nFrames.length; i++) {
+            var ctx = nFrames[i].getContext('2d');
+            var d = ctx.getImageData(0,0,cellW,cellH).data;
+            var minX = cellW, maxX = 0, minY = cellH, maxY = 0;
+            for (var y = 0; y < cellH; y++) {
+                for (var x = 0; x < cellW; x++) {
+                    if (d[(y*cellW+x)*4+3] > 0) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (minX > maxX) { minX = 0; maxX = cellW; minY = 0; maxY = cellH; }
+            bounds.push({minX: minX, maxX: maxX, minY: minY, maxY: maxY});
+        }
+        
+        window.lanSpriteData = { frames: nFrames, frameWidth: cellW, frameHeight: cellH, bounds: bounds };
+    } catch(e) { console.error(e); }
+};
+
+window.minhSpriteData = null;
+var mImg = new Image();
+mImg.src = 'assets/minh_clean.png?v=1';
+mImg.onload = function() {
+    try {
+        var cols = 6, rows = 3, cellW = Math.floor(mImg.width / cols), cellH = Math.floor(mImg.height / rows);
+        var nFrames = [];
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+                var fC = document.createElement('canvas');
+                fC.width = cellW; fC.height = cellH;
+                var fCtx = fC.getContext('2d'); fCtx.imageSmoothingEnabled = false;
+                fCtx.drawImage(mImg, c * cellW, r * cellH, cellW, cellH, 0, 0, cellW, cellH);
+                nFrames.push(fC);
+            }
+        }
+        
+        var bounds = [];
+        for (var i = 0; i < nFrames.length; i++) {
+            var ctx = nFrames[i].getContext('2d');
+            var d = ctx.getImageData(0,0,cellW,cellH).data;
+            var minX = cellW, maxX = 0, minY = cellH, maxY = 0;
+            for (var y = 0; y < cellH; y++) {
+                for (var x = 0; x < cellW; x++) {
+                    if (d[(y*cellW+x)*4+3] > 0) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (minX > maxX) { minX = 0; maxX = cellW; minY = 0; maxY = cellH; }
+            bounds.push({minX: minX, maxX: maxX, minY: minY, maxY: maxY});
+        }
+        
+        window.minhSpriteData = { frames: nFrames, frameWidth: cellW, frameHeight: cellH, bounds: bounds };
+    } catch(e) { console.error(e); }
+};
+
+window.khanhSpriteData = null;
+var kImg = new Image();
+kImg.src = 'assets/khanh_clean.png?v=1';
+kImg.onload = function() {
+    try {
+        var cols = 6, rows = 4, cellW = Math.floor(kImg.width / cols), cellH = Math.floor(kImg.height / rows);
+        var nFrames = [];
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+                var fC = document.createElement('canvas');
+                fC.width = cellW; fC.height = cellH;
+                var fCtx = fC.getContext('2d'); fCtx.imageSmoothingEnabled = false;
+                fCtx.drawImage(kImg, c * cellW, r * cellH, cellW, cellH, 0, 0, cellW, cellH);
+                nFrames.push(fC);
+            }
+        }
+        
+        var bounds = [];
+        for (var i = 0; i < nFrames.length; i++) {
+            var ctx = nFrames[i].getContext('2d');
+            var d = ctx.getImageData(0,0,cellW,cellH).data;
+            var minX = cellW, maxX = 0, minY = cellH, maxY = 0;
+            for (var y = 0; y < cellH; y++) {
+                for (var x = 0; x < cellW; x++) {
+                    if (d[(y*cellW+x)*4+3] > 0) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (minX > maxX) { minX = 0; maxX = cellW; minY = 0; maxY = cellH; }
+            bounds.push({minX: minX, maxX: maxX, minY: minY, maxY: maxY});
+        }
+        
+        window.khanhSpriteData = { frames: nFrames, frameWidth: cellW, frameHeight: cellH, bounds: bounds };
+    } catch(e) { console.error(e); }
+};
+
+window.hungSpriteData = null;
+var hImg = new Image();
+hImg.src = 'assets/hung_clean.png?v=1';
+hImg.onload = function() {
+    try {
+        var cols = 8, rows = 3, cellW = Math.floor(hImg.width / cols), cellH = Math.floor(hImg.height / rows);
+        var nFrames = [];
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+                var fC = document.createElement('canvas');
+                fC.width = cellW; fC.height = cellH;
+                var fCtx = fC.getContext('2d'); fCtx.imageSmoothingEnabled = false;
+                fCtx.drawImage(hImg, c * cellW, r * cellH, cellW, cellH, 0, 0, cellW, cellH);
+                nFrames.push(fC);
+            }
+        }
+        
+        var bounds = [];
+        for (var i = 0; i < nFrames.length; i++) {
+            var ctx = nFrames[i].getContext('2d');
+            var d = ctx.getImageData(0,0,cellW,cellH).data;
+            var minX = cellW, maxX = 0, minY = cellH, maxY = 0;
+            for (var y = 0; y < cellH; y++) {
+                for (var x = 0; x < cellW; x++) {
+                    if (d[(y*cellW+x)*4+3] > 0) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (minX > maxX) { minX = 0; maxX = cellW; minY = 0; maxY = cellH; }
+            bounds.push({minX: minX, maxX: maxX, minY: minY, maxY: maxY});
+        }
+        
+        window.hungSpriteData = { frames: nFrames, frameWidth: cellW, frameHeight: cellH, bounds: bounds };
+    } catch(e) { console.error(e); }
+};
+
+window.playerSpriteData = null;
+var pImg = new Image();
+pImg.src = 'assets/player_fixed.png?v=5';
+pImg.onload = function() {
+    try {
+        var cols = 3, rows = 4, cellW = Math.floor(pImg.width / cols), cellH = Math.floor(pImg.height / rows);
+        var nFrames = [];
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+                var fC = document.createElement('canvas');
+                fC.width = cellW; fC.height = cellH;
+                var fCtx = fC.getContext('2d'); fCtx.imageSmoothingEnabled = false;
+                fCtx.drawImage(pImg, c * cellW, r * cellH, cellW, cellH, 0, 0, cellW, cellH);
+                nFrames.push(fC);
+            }
+        }
+        
+        var dirLog = [];
+        var rightRowIndex = 2; // Default to row 2
+        var leftRowIndex = 1;  // Default to row 1
+        var rightFrames = [];
+        var leftFrames = [];
+        
+        // Auto-detect direction for side rows (1 and 2)
+        for (var r = 1; r <= 2; r++) {
+            var c = 0; // Check first frame of the row
+            var fC = nFrames[r * 3 + c];
+            var ctx = fC.getContext('2d');
+            var d = ctx.getImageData(0,0,cellW,cellH).data;
+            var minX = cellW, maxX = 0;
+            var eyeX = 0, eyeCount = 0;
+            for (var y=0; y<cellH; y++) {
+                for (var x=0; x<cellW; x++) {
+                    var i = (y*cellW + x)*4;
+                    if (d[i+3] > 0) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        // Eye is white pixel in top half
+                        if (d[i]>240 && d[i+1]>240 && d[i+2]>240 && y < cellH/2) {
+                            eyeX += x;
+                            eyeCount++;
+                        }
+                    }
+                }
+            }
+            var cx = (minX + maxX) / 2;
+            var avgEyeX = eyeCount > 0 ? (eyeX / eyeCount) : cx;
+            var dir = avgEyeX >= cx ? "RIGHT" : "LEFT";
+            dirLog.push("Row " + r + " Col " + c + " faces: " + dir);
+            if (dir === "RIGHT") rightRowIndex = r;
+            else leftRowIndex = r;
+        }
+        console.log("Auto-detected directions:", dirLog);
+        
+        // Generate mirrored frames based on the detected RIGHT row
+        for (var c = 0; c < cols; c++) {
+            var rFrame = nFrames[rightRowIndex * 3 + c];
+            var lFrame = document.createElement('canvas');
+            lFrame.width = cellW; lFrame.height = cellH;
+            var lCtx = lFrame.getContext('2d');
+            lCtx.imageSmoothingEnabled = false;
+            lCtx.translate(cellW, 0);
+            lCtx.scale(-1, 1);
+            lCtx.drawImage(rFrame, 0, 0);
+            
+            rightFrames.push(rFrame);
+            leftFrames.push(lFrame);
+        }
+        
+        // Replace row 1 and 2 in nFrames (row 1 = left, row 2 = right usually, but we swap if debug is on)
+        for (var c = 0; c < cols; c++) {
+            nFrames[1 * 3 + c] = window.SWAP_LEFT_RIGHT ? rightFrames[c] : leftFrames[c];
+            nFrames[2 * 3 + c] = window.SWAP_LEFT_RIGHT ? leftFrames[c] : rightFrames[c];
+        }
+
+        
+        // --- ADDED: NPC Variants ---
+        window.npcSpriteVariantsList = [];
+        var variants = [
+            {r: 1.5, g: 0.5, b: 0.5}, // Red
+            {r: 0.5, g: 1.5, b: 0.5}, // Green
+            {r: 1.5, g: 1.0, b: 0.3}, // Orange
+            {r: 1.3, g: 0.5, b: 1.3}  // Purple
+        ];
+        function drawOutlinedAndTinted(sourceCanvas, rM, gM, bM) {
+            var out = document.createElement('canvas');
+            out.width = sourceCanvas.width; out.height = sourceCanvas.height;
+            var ctx = out.getContext('2d');
+            var temp = document.createElement('canvas');
+            temp.width = sourceCanvas.width; temp.height = sourceCanvas.height;
+            var tCtx = temp.getContext('2d');
+            tCtx.drawImage(sourceCanvas, 0, 0);
+            var imgD = tCtx.getImageData(0,0,temp.width,temp.height);
+            var data = imgD.data;
+            for (var i=0; i<data.length; i+=4) {
+                if (data[i+3]>0) {
+                    var r = data[i], g = data[i+1], b = data[i+2];
+                    if (r > 100 && r < 200 && g > 100 && g < 200 && b > 100 && b < 220) {
+                        data[i] = Math.min(255, r * rM);
+                        data[i+1] = Math.min(255, g * gM);
+                        data[i+2] = Math.min(255, b * bM);
+                    }
+                }
+            }
+            tCtx.putImageData(imgD, 0, 0);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.imageSmoothingEnabled = false;
+            var offs = [[-1,0],[1,0],[0,-1],[0,1]];
+            for(var o=0; o<offs.length; o++) ctx.drawImage(temp, offs[o][0], offs[o][1]);
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0,0,out.width,out.height);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(temp, 0, 0);
+            return out;
+        }
+        variants.forEach(function(v) {
+            var vFrames = [];
+            nFrames.forEach(function(fC) {
+                vFrames.push(drawOutlinedAndTinted(fC, v.r, v.g, v.b));
+            });
+            window.npcSpriteVariantsList.push(vFrames);
+        });
+        // ---------------------------
+        
+        // --- ADDED: NPC Variants ---
+        window.npcSpriteVariantsList = [];
+        var variants = [
+            {r: 1.5, g: 0.5, b: 0.5}, // Red
+            {r: 0.5, g: 1.5, b: 0.5}, // Green
+            {r: 1.5, g: 1.0, b: 0.3}, // Orange
+            {r: 1.3, g: 0.5, b: 1.3}  // Purple
+        ];
+        function drawOutlinedAndTinted(sourceCanvas, rM, gM, bM) {
+            var out = document.createElement('canvas');
+            out.width = sourceCanvas.width; out.height = sourceCanvas.height;
+            var ctx = out.getContext('2d');
+            var temp = document.createElement('canvas');
+            temp.width = sourceCanvas.width; temp.height = sourceCanvas.height;
+            var tCtx = temp.getContext('2d');
+            tCtx.drawImage(sourceCanvas, 0, 0);
+            var imgD = tCtx.getImageData(0,0,temp.width,temp.height);
+            var data = imgD.data;
+            for (var i=0; i<data.length; i+=4) {
+                if (data[i+3]>0) {
+                    var r = data[i], g = data[i+1], b = data[i+2];
+                    if (r > 100 && r < 200 && g > 100 && g < 200 && b > 100 && b < 220) {
+                        data[i] = Math.min(255, r * rM);
+                        data[i+1] = Math.min(255, g * gM);
+                        data[i+2] = Math.min(255, b * bM);
+                    }
+                }
+            }
+            tCtx.putImageData(imgD, 0, 0);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.imageSmoothingEnabled = false;
+            var offs = [[-1,0],[1,0],[0,-1],[0,1]];
+            for(var o=0; o<offs.length; o++) ctx.drawImage(temp, offs[o][0], offs[o][1]);
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0,0,out.width,out.height);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(temp, 0, 0);
+            return out;
+        }
+        variants.forEach(function(v) {
+            var vFrames = [];
+            nFrames.forEach(function(fC) {
+                vFrames.push(drawOutlinedAndTinted(fC, v.r, v.g, v.b));
+            });
+            window.npcSpriteVariantsList.push(vFrames);
+        });
+        // Calculate bounds
+        var bounds = [];
+        for (var i = 0; i < nFrames.length; i++) {
+            var ctx = nFrames[i].getContext('2d');
+            var d = ctx.getImageData(0,0,cellW,cellH).data;
+            var minX = cellW, maxX = 0, minY = cellH, maxY = 0;
+            for (var y = 0; y < cellH; y++) {
+                for (var x = 0; x < cellW; x++) {
+                    if (d[(y*cellW+x)*4+3] > 0) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (minX > maxX) { minX = 0; maxX = cellW; minY = 0; maxY = cellH; }
+            bounds.push({minX: minX, maxX: maxX, minY: minY, maxY: maxY});
+        }
+        
+        // ---------------------------
+        window.playerSpriteData = { frames: nFrames, frameWidth: cellW, frameHeight: cellH, bounds: bounds };
+
+
+    } catch(e) { console.error('Sprite load error', e); }
+};
