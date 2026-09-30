@@ -1127,11 +1127,13 @@ var PixelIntro = (function () {
         ctx.clip();
 
         // Digital Portrait background (glowing modern gradient)
-        var grad = ctx.createLinearGradient(x, y, x, y + h);
-        grad.addColorStop(0, '#101828');
-        grad.addColorStop(1, '#1d293f');
-        ctx.fillStyle = grad;
-        ctx.fillRect(x, y, w, h);
+        if (typeof G === 'undefined' || G.character !== 'lan') {
+            var grad = ctx.createLinearGradient(x, y, x, y + h);
+            grad.addColorStop(0, '#101828');
+            grad.addColorStop(1, '#1d293f');
+            ctx.fillStyle = grad;
+            ctx.fillRect(x, y, w, h);
+        }
 
         // Subtler digital dots for high-tech CRT vibe
         ctx.fillStyle = 'rgba(255,255,255,0.02)';
